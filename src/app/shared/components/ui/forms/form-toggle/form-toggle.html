@@ -1,0 +1,35 @@
+<div class="flex items-center gap-3">
+  <button
+    type="button"
+    role="switch"
+    [id]="uniqueId"
+    [attr.aria-checked]="checked"
+    [attr.aria-labelledby]="label ? uniqueId + '-label' : null"
+    [disabled]="disabled"
+    (click)="toggle()"
+    (keydown)="onKeyDown($event)"
+    [class]="sizeClasses"
+    class="relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    [class.bg-primary-500]="checked"
+    [class.bg-gray-300]="!checked"
+    [class.dark:bg-gray-600]="!checked"
+  >
+    <span
+      aria-hidden="true"
+      [class]="thumbSizeClasses + ' ' + thumbTranslateClasses"
+      class="pointer-events-none inline-block transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
+    ></span>
+  </button>
+
+  @if (label) {
+    <label
+      [id]="uniqueId + '-label'"
+      [for]="uniqueId"
+      class="text-sm font-medium text-text dark:text-text-dark-DEFAULT cursor-pointer select-none"
+      [class.opacity-50]="disabled"
+      (click)="toggle()"
+    >
+      {{ label }}
+    </label>
+  }
+</div>

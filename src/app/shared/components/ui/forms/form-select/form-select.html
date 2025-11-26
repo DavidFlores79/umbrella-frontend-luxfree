@@ -1,0 +1,49 @@
+<div class="w-full">
+  @if (label) {
+    <label
+      [for]="uniqueId"
+      class="block text-sm font-medium text-text dark:text-text-dark-DEFAULT mb-1.5"
+    >
+      {{ label }}
+      @if (required) {
+        <span class="text-accent-red ml-0.5">*</span>
+      }
+    </label>
+  }
+
+  <select
+    [id]="uniqueId"
+    [value]="value"
+    [required]="required"
+    [disabled]="disabled"
+    (change)="onSelectChange($event)"
+    (blur)="onBlur()"
+    [attr.aria-required]="required"
+    [attr.aria-invalid]="showError"
+    [attr.aria-describedby]="showError ? uniqueId + '-error' : null"
+    class="w-full px-4 py-2.5 text-sm border rounded-lg transition-all duration-200
+           bg-white dark:bg-background-dark-tertiary
+           text-text dark:text-text-dark-DEFAULT
+           border-gray-300 dark:border-gray-600
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+           disabled:bg-gray-100 dark:disabled:bg-background-dark-DEFAULT disabled:cursor-not-allowed disabled:opacity-60"
+    [class.border-accent-red]="showError"
+    [class.focus:ring-accent-red]="showError"
+  >
+    <option value="" disabled selected>{{ placeholder }}</option>
+    @for (option of options; track option.value) {
+      <option [value]="option.value">{{ option.label }}</option>
+    }
+  </select>
+
+  @if (showError) {
+    <p
+      [id]="uniqueId + '-error'"
+      class="mt-1.5 text-sm text-accent-red"
+      role="alert"
+      aria-live="polite"
+    >
+      {{ errorMessage }}
+    </p>
+  }
+</div>

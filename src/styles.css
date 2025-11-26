@@ -1,1 +1,118 @@
-/* You can add global styles to this file, and also import other style files */
+/* Tailwind CSS imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Custom Base Styles */
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-background text-text font-sans;
+  }
+
+  /* Dark mode styles */
+  .dark body {
+    @apply bg-background-dark-DEFAULT text-text-dark-DEFAULT;
+  }
+
+  /* Smooth transitions for theme switching */
+  * {
+    @apply transition-colors duration-200;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background-tertiary dark:bg-background-dark-tertiary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-text-lighter dark:bg-text-dark-lighter rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-light dark:bg-text-dark-light;
+  }
+}
+
+/* Custom Component Styles */
+@layer components {
+  /* Button base styles */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-600 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-background-tertiary dark:bg-background-dark-tertiary text-text dark:text-text-dark-DEFAULT hover:bg-background-secondary dark:hover:bg-background-dark-secondary focus:ring-text-lighter;
+  }
+
+  .btn-danger {
+    @apply bg-accent-red text-white hover:bg-red-600 focus:ring-accent-red;
+  }
+
+  /* Card base styles */
+  .card {
+    @apply bg-white dark:bg-background-dark-secondary rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6;
+  }
+
+  /* Form input base styles */
+  .form-input {
+    @apply w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-tertiary text-text dark:text-text-dark-DEFAULT focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+  }
+}
+
+/* Custom Utility Classes */
+@layer utilities {
+  /* Text gradients */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-primary-700;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  }
+
+  /* Smooth entrance animations */
+  .fade-in {
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  .slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+}

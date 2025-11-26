@@ -1,0 +1,19 @@
+<div [class]="baseClasses + ' ' + borderClasses + ' ' + shadowClasses + ' ' + paddingClasses">
+  @if (title) {
+    <div class="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-lg font-semibold text-text dark:text-text-dark-DEFAULT">
+        {{ title }}
+      </h3>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="space-y-3">
+      <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+      <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-5/6"></div>
+      <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-4/6"></div>
+    </div>
+  } @else {
+    <ng-content></ng-content>
+  }
+</div>

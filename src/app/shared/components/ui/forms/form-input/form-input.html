@@ -1,0 +1,56 @@
+<div class="w-full">
+  @if (label) {
+    <label
+      [for]="uniqueId"
+      class="block text-sm font-medium text-text dark:text-text-dark-DEFAULT mb-1.5"
+    >
+      {{ label }}
+      @if (required) {
+        <span class="text-accent-red ml-0.5">*</span>
+      }
+    </label>
+  }
+
+  <div class="relative">
+    <input
+      [id]="uniqueId"
+      [type]="type"
+      [placeholder]="placeholder"
+      [required]="required"
+      [disabled]="disabled"
+      [attr.maxlength]="maxLength"
+      [value]="value"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+      [attr.aria-required]="required"
+      [attr.aria-invalid]="showError"
+      [attr.aria-describedby]="showError ? uniqueId + '-error' : null"
+      class="w-full px-4 py-2.5 text-sm border rounded-lg transition-all duration-200
+             bg-white dark:bg-background-dark-tertiary
+             text-text dark:text-text-dark-DEFAULT
+             border-gray-300 dark:border-gray-600
+             placeholder-text-lighter dark:placeholder-text-dark-lighter
+             focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+             disabled:bg-gray-100 dark:disabled:bg-background-dark-DEFAULT disabled:cursor-not-allowed disabled:opacity-60"
+      [class.border-accent-red]="showError"
+      [class.focus:ring-accent-red]="showError"
+    />
+
+    @if (maxLength && value.length > 0) {
+      <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-lighter dark:text-text-dark-lighter">
+        {{ remainingChars }}
+      </div>
+    }
+  </div>
+
+  @if (showError) {
+    <p
+      [id]="uniqueId + '-error'"
+      class="mt-1.5 text-sm text-accent-red"
+      role="alert"
+      aria-live="polite"
+    >
+      {{ errorMessage }}
+    </p>
+  }
+</div>
