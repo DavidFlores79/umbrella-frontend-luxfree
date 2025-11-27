@@ -24,24 +24,22 @@ module.exports = {
         text: {
           DEFAULT: '#2D3E50', // Pickled Bluewood - Primary text
           light: '#6B7C93',   // Secondary text
-          lighter: '#A1B1C4',  // Tertiary text
-          // Dark mode variants
-          dark: {
-            DEFAULT: '#E5E9F0',
-            light: '#B8C2D4',
-            lighter: '#8A99B0'
-          }
+          lighter: '#A1B1C4'  // Tertiary text
+        },
+        'text-dark': {
+          DEFAULT: '#E5E9F0',
+          light: '#B8C2D4',
+          lighter: '#8A99B0'
         },
         background: {
           DEFAULT: '#FFFFFF',
           secondary: '#FFF1EE', // Forget Me Not
-          tertiary: '#F7F9FB',
-          // Dark mode variants
-          dark: {
-            DEFAULT: '#1A1F2E',
-            secondary: '#242936',
-            tertiary: '#2D3342'
-          }
+          tertiary: '#F7F9FB'
+        },
+        'background-dark': {
+          DEFAULT: '#1A1F2E',
+          secondary: '#242936',
+          tertiary: '#2D3342'
         },
         accent: {
           blue: '#0091AE',    // Trust, info

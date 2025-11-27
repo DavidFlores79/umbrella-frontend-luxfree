@@ -1,0 +1,106 @@
+<div class="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-white dark:bg-background-dark-secondary border-t border-gray-200 dark:border-gray-700 rounded-b-lg">
+  <!-- Items Info -->
+  <div class="text-sm text-text-light dark:text-text-dark-light">
+    Showing <span class="font-medium text-text dark:text-text-dark-DEFAULT">{{ startItem }}</span>
+    to <span class="font-medium text-text dark:text-text-dark-DEFAULT">{{ endItem }}</span>
+    of <span class="font-medium text-text dark:text-text-dark-DEFAULT">{{ totalItems }}</span>
+    results
+  </div>
+
+  <!-- Page Navigation -->
+  <nav class="flex items-center gap-2" aria-label="Pagination">
+    <!-- Previous Button -->
+    <button
+      type="button"
+      (click)="onPageChange(currentPage - 1)"
+      [disabled]="!hasPrevious"
+      class="px-3 py-2 text-sm font-medium text-text dark:text-text-dark-DEFAULT bg-white dark:bg-background-dark-tertiary border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      aria-label="Previous page">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <!-- First Page -->
+    <button
+      *ngIf="showFirstPage"
+      type="button"
+      (click)="onPageChange(1)"
+      class="px-3 py-2 text-sm font-medium text-text dark:text-text-dark-DEFAULT bg-white dark:bg-background-dark-tertiary border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+      aria-label="Page 1">
+      1
+    </button>
+
+    <!-- Ellipsis Before -->
+    <span
+      *ngIf="showFirstPage && visiblePages[0] > 2"
+      class="px-2 text-text-light dark:text-text-dark-light">
+      ...
+    </span>
+
+    <!-- Page Numbers -->
+    <button
+      *ngFor="let page of visiblePages"
+      type="button"
+      (click)="onPageChange(page)"
+      [class.bg-primary-500]="page === currentPage"
+      [class.text-white]="page === currentPage"
+      [class.hover:bg-primary-600]="page === currentPage"
+      [class.bg-white]="page !== currentPage"
+      [class.dark:bg-background-dark-tertiary]="page !== currentPage"
+      [class.text-text]="page !== currentPage"
+      [class.dark:text-text-dark-DEFAULT]="page !== currentPage"
+      [class.hover:bg-gray-50]="page !== currentPage"
+      [class.dark:hover:bg-gray-700]="page !== currentPage"
+      class="px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
+      [attr.aria-label]="'Page ' + page"
+      [attr.aria-current]="page === currentPage ? 'page' : null">
+      {{ page }}
+    </button>
+
+    <!-- Ellipsis After -->
+    <span
+      *ngIf="showLastPage && visiblePages[visiblePages.length - 1] < totalPages - 1"
+      class="px-2 text-text-light dark:text-text-dark-light">
+      ...
+    </span>
+
+    <!-- Last Page -->
+    <button
+      *ngIf="showLastPage"
+      type="button"
+      (click)="onPageChange(totalPages)"
+      class="px-3 py-2 text-sm font-medium text-text dark:text-text-dark-DEFAULT bg-white dark:bg-background-dark-tertiary border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+      [attr.aria-label]="'Page ' + totalPages">
+      {{ totalPages }}
+    </button>
+
+    <!-- Next Button -->
+    <button
+      type="button"
+      (click)="onPageChange(currentPage + 1)"
+      [disabled]="!hasNext"
+      class="px-3 py-2 text-sm font-medium text-text dark:text-text-dark-DEFAULT bg-white dark:bg-background-dark-tertiary border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      aria-label="Next page">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Page Size Selector -->
+  <div *ngIf="showPageSizeSelector" class="flex items-center gap-2">
+    <label for="pageSize" class="text-sm text-text-light dark:text-text-dark-light">
+      Per page:
+    </label>
+    <select
+      id="pageSize"
+      [value]="pageSize"
+      (change)="onPageSizeChange($event)"
+      class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-tertiary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500">
+      <option *ngFor="let option of pageSizeOptions" [value]="option">
+        {{ option }}
+      </option>
+    </select>
+  </div>
+</div>

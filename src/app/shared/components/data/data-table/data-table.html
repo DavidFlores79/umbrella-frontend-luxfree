@@ -1,0 +1,150 @@
+<div class="w-full overflow-hidden">
+  <!-- Desktop Table View -->
+  <div class="hidden md:block overflow-x-auto">
+    <table class="w-full border-collapse">
+      <!-- Header -->
+      <thead class="bg-background-tertiary dark:bg-background-dark-tertiary border-b border-gray-200 dark:border-gray-700">
+        <tr>
+          <!-- Selection Column -->
+          <th
+            *ngIf="selectable"
+            class="px-4 py-3 w-12">
+            <input
+              type="checkbox"
+              [checked]="allSelected"
+              (change)="onSelectAll($event)"
+              class="rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-primary-500"
+              aria-label="Select all rows">
+          </th>
+
+          <!-- Data Columns -->
+          <th
+            *ngFor="let column of columns"
+            [style.width]="column.width"
+            [class]="'px-4 py-3 text-sm font-semibold text-text dark:text-text-dark-DEFAULT ' + getAlignClass(column)">
+
+            <button
+              *ngIf="column.sortable"
+              type="button"
+              (click)="onSort(column)"
+              class="inline-flex items-center gap-2 hover:text-primary-500 transition-colors focus:outline-none focus:text-primary-500">
+              {{ column.label }}
+              <svg
+                *ngIf="getSortIcon(column)"
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  [attr.d]="getSortIcon(column)">
+                </path>
+              </svg>
+            </button>
+
+            <span *ngIf="!column.sortable">{{ column.label }}</span>
+          </th>
+        </tr>
+      </thead>
+
+      <!-- Body - Loading State -->
+      <tbody *ngIf="loading">
+        <tr *ngFor="let _ of [1,2,3,4,5]">
+          <td *ngIf="selectable" class="px-4 py-3">
+            <app-skeleton-loader variant="circle" width="20px" height="20px"></app-skeleton-loader>
+          </td>
+          <td *ngFor="let column of columns" class="px-4 py-3">
+            <app-skeleton-loader variant="text"></app-skeleton-loader>
+          </td>
+        </tr>
+      </tbody>
+
+      <!-- Body - Data -->
+      <tbody *ngIf="!loading && !isEmpty" class="divide-y divide-gray-200 dark:divide-gray-700">
+        <tr
+          *ngFor="let row of data; trackBy: trackByFn"
+          (click)="onRowClick(row)"
+          class="hover:bg-background-secondary dark:hover:bg-background-dark-secondary transition-colors cursor-pointer"
+          [class.bg-primary-50]="isRowSelected(row)"
+          [class.dark:bg-primary-900/10]="isRowSelected(row)">
+
+          <!-- Selection Cell -->
+          <td *ngIf="selectable" class="px-4 py-3">
+            <input
+              type="checkbox"
+              [checked]="isRowSelected(row)"
+              (change)="onSelectRow(row, $event)"
+              class="rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-primary-500"
+              [attr.aria-label]="'Select row'">
+          </td>
+
+          <!-- Data Cells -->
+          <td
+            *ngFor="let column of columns"
+            [class]="'px-4 py-3 text-sm text-text dark:text-text-dark-DEFAULT ' + getAlignClass(column)">
+            {{ getCellValue(row, column) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="isEmpty" class="py-8">
+      <app-empty-state
+        [title]="emptyStateTitle"
+        [description]="emptyStateDescription"
+        [icon]="emptyStateIcon">
+      </app-empty-state>
+    </div>
+  </div>
+
+  <!-- Mobile Card View -->
+  <div class="md:hidden space-y-4">
+    <!-- Loading Cards -->
+    <div *ngIf="loading" class="space-y-4">
+      <app-skeleton-loader
+        *ngFor="let _ of [1,2,3]"
+        variant="card"
+        height="120px">
+      </app-skeleton-loader>
+    </div>
+
+    <!-- Data Cards -->
+    <div
+      *ngFor="let row of data"
+      (click)="onRowClick(row)"
+      class="bg-white dark:bg-background-dark-secondary p-4 rounded-lg border border-gray-200 dark:border-gray-700 space-y-2 cursor-pointer hover:shadow-md transition-shadow">
+
+      <div
+        *ngFor="let column of columns"
+        class="flex justify-between items-center">
+        <span class="text-sm font-medium text-text-light dark:text-text-dark-light">
+          {{ column.label }}:
+        </span>
+        <span class="text-sm text-text dark:text-text-dark-DEFAULT">
+          {{ getCellValue(row, column) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <app-empty-state
+      *ngIf="isEmpty"
+      [title]="emptyStateTitle"
+      [description]="emptyStateDescription"
+      [icon]="emptyStateIcon">
+    </app-empty-state>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="showPagination && !isEmpty" class="mt-4">
+    <app-pagination
+      [totalItems]="totalItems"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
+  </div>
+</div>

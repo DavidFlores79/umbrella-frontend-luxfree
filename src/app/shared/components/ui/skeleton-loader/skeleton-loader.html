@@ -1,0 +1,22 @@
+<!-- Single Skeleton -->
+<div
+  *ngIf="variant !== 'text' || rows === 1"
+  [class]="baseClasses + ' ' + variantClasses"
+  [style.width]="width"
+  [style.height]="height"
+  role="status"
+  aria-label="Loading content">
+</div>
+
+<!-- Multiple Text Rows -->
+<div
+  *ngIf="variant === 'text' && rows > 1"
+  class="space-y-3"
+  role="status"
+  aria-label="Loading content">
+  <div
+    *ngFor="let _ of rowsArray; let last = last"
+    [class]="baseClasses + ' ' + variantClasses"
+    [style.width]="last ? '80%' : '100%'">
+  </div>
+</div>

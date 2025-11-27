@@ -1,0 +1,51 @@
+<app-card [loading]="loading" shadow="md" padding="md">
+  <div class="flex items-start justify-between">
+    <!-- Left Content -->
+    <div class="flex-1 min-w-0">
+      <!-- Title -->
+      <p class="text-sm font-medium text-text-light dark:text-text-dark-light mb-1 truncate">
+        {{ title }}
+      </p>
+
+      <!-- Value -->
+      <p class="text-2xl font-bold text-text dark:text-text-dark-DEFAULT mb-2">
+        {{ value }}
+      </p>
+
+      <!-- Change Indicator -->
+      <div
+        *ngIf="hasChange"
+        class="flex items-center gap-1"
+        [class]="trendColor">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            [attr.d]="trendIcon">
+          </path>
+        </svg>
+        <span class="text-sm font-medium">{{ change }}</span>
+      </div>
+    </div>
+
+    <!-- Icon -->
+    <div
+      *ngIf="icon"
+      class="flex-shrink-0 w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+      <svg
+        class="w-6 h-6 text-primary-600 dark:text-primary-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          [attr.d]="icon">
+        </path>
+      </svg>
+    </div>
+  </div>
+</app-card>

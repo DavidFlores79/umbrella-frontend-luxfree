@@ -1,0 +1,43 @@
+<div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+  <!-- Icon -->
+  <div class="w-16 h-16 mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+    <svg
+      class="w-8 h-8 text-gray-400 dark:text-gray-500"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        [attr.d]="icon">
+      </path>
+    </svg>
+  </div>
+
+  <!-- Title -->
+  <h3 class="text-lg font-semibold text-text dark:text-text-dark-DEFAULT mb-2">
+    {{ title }}
+  </h3>
+
+  <!-- Description -->
+  <p
+    *ngIf="description"
+    class="text-sm text-text-light dark:text-text-dark-light max-w-md mb-6">
+    {{ description }}
+  </p>
+
+  <!-- Custom Content Projection -->
+  <div class="text-sm text-text-light dark:text-text-dark-light max-w-md mb-6">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Action Button -->
+  <app-button
+    *ngIf="hasAction"
+    [variant]="actionVariant"
+    (clicked)="onActionClick()">
+    {{ actionLabel }}
+  </app-button>
+</div>

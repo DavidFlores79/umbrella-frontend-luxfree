@@ -1,0 +1,23 @@
+<span
+  [class]="baseClasses + ' ' + variantClasses + ' ' + disabledClass"
+  role="status"
+  [attr.aria-label]="'Chip: ' + variant">
+
+  <!-- Content -->
+  <span class="truncate">
+    <ng-content></ng-content>
+  </span>
+
+  <!-- Remove Button -->
+  <button
+    *ngIf="removable"
+    type="button"
+    (click)="onRemove($event)"
+    [disabled]="disabled"
+    class="flex-shrink-0 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-current"
+    aria-label="Remove">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+</span>

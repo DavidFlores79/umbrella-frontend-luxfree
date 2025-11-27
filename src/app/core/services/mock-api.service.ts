@@ -542,9 +542,11 @@ export class MockApiService {
       updated.total = updated.subtotal + updated.taxAmount;
     }
 
+    // Destructure items from dto to avoid overwriting the correctly typed items array
+    const { items: _, ...dtoWithoutItems } = dto;
     updated = {
       ...updated,
-      ...dto,
+      ...dtoWithoutItems,
       updatedAt: new Date()
     };
 
@@ -708,9 +710,11 @@ export class MockApiService {
       updated.total = updated.subtotal + updated.taxAmount;
     }
 
+    // Destructure items from dto to avoid overwriting the correctly typed items array
+    const { items: _purchaseItems, ...dtoWithoutPurchaseItems } = dto;
     updated = {
       ...updated,
-      ...dto,
+      ...dtoWithoutPurchaseItems,
       updatedAt: new Date()
     };
 
