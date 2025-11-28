@@ -2,7 +2,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CompaniesStore } from '../services/companies.store';
-import { DataTable } from '../../../shared/components/data/data-table/data-table';
 import { SearchBar } from '../../../shared/components/data/search-bar/search-bar';
 import { Card } from '../../../shared/components/ui/card/card';
 import { Button } from '../../../shared/components/ui/button/button';
@@ -18,7 +17,6 @@ import { map } from 'rxjs/operators';
   standalone: true,
   imports: [
     CommonModule,
-    DataTable,
     SearchBar,
     Card,
     Button,

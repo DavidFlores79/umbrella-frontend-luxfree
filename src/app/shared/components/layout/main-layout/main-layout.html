@@ -1,1 +1,18 @@
-<p>main-layout works!</p>
+<div class="min-h-screen bg-background dark:bg-background-dark-DEFAULT">
+  <!-- Header -->
+  <app-header></app-header>
+
+  <!-- Main Content Area -->
+  <div class="flex">
+    <!-- Sidebar -->
+    <app-sidebar></app-sidebar>
+
+    <!-- Main Content -->
+    <main class="flex-1 min-w-0">
+      <ng-content></ng-content>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>

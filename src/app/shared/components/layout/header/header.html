@@ -1,1 +1,25 @@
-<p>header works!</p>
+<header class="bg-white dark:bg-background-dark-secondary border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+  <div class="px-6 py-4">
+    <div class="flex items-center justify-between">
+      <!-- Left: Logo/Brand -->
+      <div class="flex items-center gap-4">
+        <h1 class="text-xl font-bold text-primary dark:text-primary-400">Umbrella</h1>
+      </div>
+
+      <!-- Right: User Menu -->
+      <div class="flex items-center gap-4">
+        @if (user$ | async; as user) {
+          <span class="text-sm text-text dark:text-text-dark-DEFAULT">
+            {{ $any(user).firstName }} {{ $any(user).lastName }}
+          </span>
+          <button
+            (click)="onLogout()"
+            class="px-4 py-2 text-sm font-medium text-white bg-accent-red hover:bg-accent-red/90 rounded-lg transition-colors"
+            type="button">
+            Logout
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</header>
