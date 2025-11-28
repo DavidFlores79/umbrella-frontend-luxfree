@@ -1,0 +1,338 @@
+<div class="min-h-screen bg-background py-8 px-4">
+  <div class="max-w-3xl mx-auto">
+    <!-- Logo and Title -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-text mb-2">Create Your Account</h1>
+      <p class="text-text-light">Get started with Umbrella</p>
+    </div>
+
+    <!-- Registration Card -->
+    <app-card>
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage" class="mb-6">
+        <app-alert
+          type="error"
+          [title]="errorMessage"
+          [dismissible]="true"
+          (dismissed)="dismissError()">
+        </app-alert>
+      </div>
+
+      <!-- Registration Form -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-8">
+
+        <!-- User Information Section -->
+        <div>
+          <h2 class="text-lg font-semibold text-text mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+            User Information
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- First Name -->
+            <div>
+              <label for="firstName" class="block text-sm font-medium text-text mb-2">
+                First Name
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                formControlName="firstName"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('firstName')"
+                placeholder="John"
+              />
+              <p *ngIf="getFieldError('firstName')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('firstName') }}
+              </p>
+            </div>
+
+            <!-- Last Name -->
+            <div>
+              <label for="lastName" class="block text-sm font-medium text-text mb-2">
+                Last Name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                formControlName="lastName"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('lastName')"
+                placeholder="Doe"
+              />
+              <p *ngIf="getFieldError('lastName')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('lastName') }}
+              </p>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-text mb-2">
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('email')"
+                placeholder="john@company.com"
+              />
+              <p *ngIf="getFieldError('email')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('email') }}
+              </p>
+            </div>
+
+            <!-- Phone -->
+            <div>
+              <label for="phone" class="block text-sm font-medium text-text mb-2">
+                Phone Number
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('phone')"
+                placeholder="+1 (555) 123-4567"
+              />
+              <p *ngIf="getFieldError('phone')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('phone') }}
+              </p>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="password" class="block text-sm font-medium text-text mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('password')"
+                placeholder="Min. 6 characters"
+              />
+              <p *ngIf="getFieldError('password')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('password') }}
+              </p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-text mb-2">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                formControlName="confirmPassword"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('confirmPassword')"
+                placeholder="Re-enter password"
+              />
+              <p *ngIf="getFieldError('confirmPassword')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('confirmPassword') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Company Information Section -->
+        <div>
+          <h2 class="text-lg font-semibold text-text mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+            Company Information
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Company Name -->
+            <div class="md:col-span-2">
+              <label for="companyName" class="block text-sm font-medium text-text mb-2">
+                Company Name
+              </label>
+              <input
+                id="companyName"
+                type="text"
+                formControlName="companyName"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyName')"
+                placeholder="Your Company Inc."
+              />
+              <p *ngIf="getFieldError('companyName')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyName') }}
+              </p>
+            </div>
+
+            <!-- Company Email -->
+            <div>
+              <label for="companyEmail" class="block text-sm font-medium text-text mb-2">
+                Company Email
+              </label>
+              <input
+                id="companyEmail"
+                type="email"
+                formControlName="companyEmail"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyEmail')"
+                placeholder="info@company.com"
+              />
+              <p *ngIf="getFieldError('companyEmail')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyEmail') }}
+              </p>
+            </div>
+
+            <!-- Company Phone -->
+            <div>
+              <label for="companyPhone" class="block text-sm font-medium text-text mb-2">
+                Company Phone
+              </label>
+              <input
+                id="companyPhone"
+                type="tel"
+                formControlName="companyPhone"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyPhone')"
+                placeholder="+1 (555) 987-6543"
+              />
+              <p *ngIf="getFieldError('companyPhone')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyPhone') }}
+              </p>
+            </div>
+
+            <!-- Address -->
+            <div class="md:col-span-2">
+              <label for="companyAddress" class="block text-sm font-medium text-text mb-2">
+                Address
+              </label>
+              <input
+                id="companyAddress"
+                type="text"
+                formControlName="companyAddress"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyAddress')"
+                placeholder="123 Business Street"
+              />
+              <p *ngIf="getFieldError('companyAddress')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyAddress') }}
+              </p>
+            </div>
+
+            <!-- City -->
+            <div>
+              <label for="companyCity" class="block text-sm font-medium text-text mb-2">
+                City
+              </label>
+              <input
+                id="companyCity"
+                type="text"
+                formControlName="companyCity"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyCity')"
+                placeholder="San Francisco"
+              />
+              <p *ngIf="getFieldError('companyCity')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyCity') }}
+              </p>
+            </div>
+
+            <!-- State -->
+            <div>
+              <label for="companyState" class="block text-sm font-medium text-text mb-2">
+                State/Province
+              </label>
+              <input
+                id="companyState"
+                type="text"
+                formControlName="companyState"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyState')"
+                placeholder="CA"
+              />
+              <p *ngIf="getFieldError('companyState')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyState') }}
+              </p>
+            </div>
+
+            <!-- Country -->
+            <div>
+              <label for="companyCountry" class="block text-sm font-medium text-text mb-2">
+                Country
+              </label>
+              <input
+                id="companyCountry"
+                type="text"
+                formControlName="companyCountry"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyCountry')"
+                placeholder="USA"
+              />
+              <p *ngIf="getFieldError('companyCountry')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyCountry') }}
+              </p>
+            </div>
+
+            <!-- Postal Code -->
+            <div>
+              <label for="companyPostalCode" class="block text-sm font-medium text-text mb-2">
+                Postal Code
+              </label>
+              <input
+                id="companyPostalCode"
+                type="text"
+                formControlName="companyPostalCode"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyPostalCode')"
+                placeholder="94105"
+              />
+              <p *ngIf="getFieldError('companyPostalCode')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyPostalCode') }}
+              </p>
+            </div>
+
+            <!-- Tax ID -->
+            <div class="md:col-span-2">
+              <label for="companyTaxId" class="block text-sm font-medium text-text mb-2">
+                Tax ID
+              </label>
+              <input
+                id="companyTaxId"
+                type="text"
+                formControlName="companyTaxId"
+                class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                [class.border-accent-red]="getFieldError('companyTaxId')"
+                placeholder="XX-XXXXXXX"
+              />
+              <p *ngIf="getFieldError('companyTaxId')" class="mt-1.5 text-sm text-accent-red">
+                {{ getFieldError('companyTaxId') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4">
+          <app-button
+            type="submit"
+            variant="primary"
+            size="md"
+            [fullWidth]="true"
+            [loading]="(loading$ | async) ?? false"
+            [disabled]="(loading$ | async) ?? false">
+            <span *ngIf="!(loading$ | async)">Create Account</span>
+            <span *ngIf="loading$ | async">Creating Account...</span>
+          </app-button>
+        </div>
+      </form>
+
+      <!-- Login Link -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-text-light">
+          Already have an account?
+          <a
+            routerLink="/auth/login"
+            class="text-primary-500 hover:text-primary-600 font-medium transition-colors">
+            Sign in
+          </a>
+        </p>
+      </div>
+    </app-card>
+  </div>
+</div>

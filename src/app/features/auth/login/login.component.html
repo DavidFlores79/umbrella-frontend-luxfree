@@ -1,0 +1,92 @@
+<div class="min-h-screen bg-background flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Logo and Title -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-text mb-2">Umbrella</h1>
+      <p class="text-text-light">Sign in to your account</p>
+    </div>
+
+    <!-- Login Card -->
+    <app-card>
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage" class="mb-6">
+        <app-alert
+          type="error"
+          [title]="errorMessage"
+          [dismissible]="true"
+          (dismissed)="dismissError()">
+        </app-alert>
+      </div>
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-text mb-2">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            [class.border-accent-red]="getFieldError('email')"
+            placeholder="you@example.com"
+          />
+          <p *ngIf="getFieldError('email')" class="mt-1.5 text-sm text-accent-red">
+            {{ getFieldError('email') }}
+          </p>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-text mb-2">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark-secondary text-text dark:text-text-dark-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            [class.border-accent-red]="getFieldError('password')"
+            placeholder="Enter your password"
+          />
+          <p *ngIf="getFieldError('password')" class="mt-1.5 text-sm text-accent-red">
+            {{ getFieldError('password') }}
+          </p>
+        </div>
+
+        <!-- Submit Button -->
+        <app-button
+          type="submit"
+          variant="primary"
+          size="md"
+          [fullWidth]="true"
+          [loading]="(loading$ | async) ?? false"
+          [disabled]="(loading$ | async) ?? false">
+          <span *ngIf="!(loading$ | async)">Sign In</span>
+          <span *ngIf="loading$ | async">Signing In...</span>
+        </app-button>
+      </form>
+
+      <!-- Register Link -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-text-light">
+          Don't have an account?
+          <a
+            routerLink="/auth/register"
+            class="text-primary-500 hover:text-primary-600 font-medium transition-colors">
+            Sign up
+          </a>
+        </p>
+      </div>
+    </app-card>
+
+    <!-- Test Credentials Info -->
+    <div class="mt-6 text-center">
+      <p class="text-xs text-text-lighter">
+        Test credentials: admin@techsolutions.com / password123
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,227 @@
+<app-main-layout>
+  <div class="p-6 space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-text dark:text-text-dark-DEFAULT">Dashboard</h1>
+        <p class="mt-1 text-sm text-text-light dark:text-text-dark-light">
+          Welcome back! Here's what's happening with your business.
+        </p>
+      </div>
+      <button
+        (click)="onRefresh()"
+        class="px-4 py-2 text-sm font-medium text-text dark:text-text-dark-DEFAULT bg-background-secondary dark:bg-background-dark-secondary rounded-lg hover:bg-background-tertiary dark:hover:bg-background-dark-tertiary transition-colors">
+        Refresh
+      </button>
+    </div>
+
+    <ng-container *ngIf="viewModel$ | async as vm">
+      <!-- Error Alert -->
+      <app-alert
+        *ngIf="vm.error"
+        type="error"
+        [title]="vm.error">
+      </app-alert>
+
+      <!-- Loading State -->
+      <div *ngIf="vm.loading" class="space-y-6">
+        <!-- Metrics Skeleton -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <app-skeleton-loader type="card"></app-skeleton-loader>
+          <app-skeleton-loader type="card"></app-skeleton-loader>
+          <app-skeleton-loader type="card"></app-skeleton-loader>
+          <app-skeleton-loader type="card"></app-skeleton-loader>
+        </div>
+
+        <!-- Charts Skeleton -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <app-skeleton-loader type="chart"></app-skeleton-loader>
+          <app-skeleton-loader type="chart"></app-skeleton-loader>
+        </div>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div *ngIf="!vm.loading" class="space-y-6">
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Total Revenue -->
+          <app-stat-card
+            title="Total Revenue"
+            [value]="vm.metrics.totalRevenue | appCurrency"
+            change="+12.5%"
+            trend="up"
+            icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+          </app-stat-card>
+
+          <!-- Total Expenses -->
+          <app-stat-card
+            title="Total Expenses"
+            [value]="vm.metrics.totalExpenses | appCurrency"
+            change="+8.2%"
+            trend="up"
+            icon="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+          </app-stat-card>
+
+          <!-- Profit -->
+          <app-stat-card
+            title="Profit"
+            [value]="vm.metrics.profit | appCurrency"
+            [change]="vm.metrics.profit > 0 ? '+' + ((vm.metrics.profit / vm.metrics.totalRevenue) * 100).toFixed(1) + '%' : ''"
+            [trend]="calculateProfitTrend(vm.metrics)"
+            icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+          </app-stat-card>
+
+          <!-- Inventory Alerts -->
+          <app-stat-card
+            title="Low Stock Alerts"
+            [value]="vm.metrics.inventoryAlerts.toString()"
+            [change]="vm.metrics.inventoryAlerts > 0 ? 'Requires attention' : 'All good'"
+            [trend]="vm.metrics.inventoryAlerts > 0 ? 'down' : 'neutral'"
+            icon="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4">
+          </app-stat-card>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Revenue Chart -->
+          <app-card>
+            <h3 class="text-lg font-semibold text-text dark:text-text-dark-DEFAULT mb-4">
+              Revenue Trends
+            </h3>
+            <div class="h-80">
+              <canvas
+                *ngIf="vm.revenueData"
+                baseChart
+                [data]="vm.revenueData"
+                [options]="revenueChartOptions"
+                type="line">
+              </canvas>
+            </div>
+          </app-card>
+
+          <!-- Expense Chart -->
+          <app-card>
+            <h3 class="text-lg font-semibold text-text dark:text-text-dark-DEFAULT mb-4">
+              Purchases by Status
+            </h3>
+            <div class="h-80">
+              <canvas
+                *ngIf="vm.expenseData"
+                baseChart
+                [data]="vm.expenseData"
+                [options]="expenseChartOptions"
+                type="bar">
+              </canvas>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Recent Transactions -->
+        <app-card>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-text dark:text-text-dark-DEFAULT">
+              Recent Transactions
+            </h3>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700">
+                  <th class="px-4 py-3 text-left text-xs font-medium text-text-light dark:text-text-dark-light uppercase tracking-wider">
+                    Number
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-text-light dark:text-text-dark-light uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-text-light dark:text-text-dark-light uppercase tracking-wider">
+                    Customer/Vendor
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-text-light dark:text-text-dark-light uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-text-light dark:text-text-dark-light uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-text-light dark:text-text-dark-light uppercase tracking-wider">
+                    Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tr
+                  *ngFor="let transaction of vm.recentTransactions"
+                  class="hover:bg-background-secondary dark:hover:bg-background-dark-secondary transition-colors">
+                  <td class="px-4 py-3 text-sm text-text dark:text-text-dark-DEFAULT">
+                    {{ transaction.number }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <app-badge [variant]="getTypeBadgeVariant(transaction.type)">
+                      {{ transaction.type }}
+                    </app-badge>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-text dark:text-text-dark-DEFAULT">
+                    {{ transaction.customerOrVendor }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-right text-text dark:text-text-dark-DEFAULT font-medium">
+                    {{ transaction.amount | appCurrency }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <app-badge [variant]="getStatusBadgeVariant(transaction.status)">
+                      {{ transaction.status }}
+                    </app-badge>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-text-light dark:text-text-dark-light">
+                    {{ transaction.date | appDateFormat }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div
+              *ngIf="vm.recentTransactions.length === 0"
+              class="py-12 text-center">
+              <p class="text-text-light dark:text-text-dark-light">
+                No recent transactions found
+              </p>
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Low Stock Items -->
+        <app-card *ngIf="vm.lowStockItems.length > 0">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-text dark:text-text-dark-DEFAULT">
+              Low Stock Alert
+            </h3>
+            <app-badge variant="warning">Action Required</app-badge>
+          </div>
+
+          <div class="space-y-3">
+            <div
+              *ngFor="let item of vm.lowStockItems"
+              class="flex items-center justify-between p-4 bg-accent-yellow/10 dark:bg-accent-yellow/20 border border-accent-yellow/30 dark:border-accent-yellow/40 rounded-lg">
+              <div>
+                <p class="font-medium text-text dark:text-text-dark-DEFAULT">
+                  {{ item.productName }}
+                </p>
+                <p class="text-sm text-text-light dark:text-text-dark-light">
+                  SKU: {{ item.productSku }} | Location: {{ item.location }}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-lg font-semibold text-accent-yellow">
+                  {{ item.quantity }} units
+                </p>
+                <p class="text-xs text-text-light dark:text-text-dark-light">
+                  Min: {{ item.minThreshold }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </ng-container>
+  </div>
+</app-main-layout>
