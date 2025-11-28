@@ -29,15 +29,14 @@
         <div>
           <h3 class="text-lg font-medium text-text mb-4">Basic Information</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <app-form-select
-                formControlName="companyId"
+            <app-form-select
+                class="md:col-span-2"
+              formControlName="companyId"
                 label="Company"
                 [options]="(companyOptions$ | async) || []"
                 [required]="true"
                 [errorMessage]="getFieldError('companyId')"
               ></app-form-select>
-            </div>
 
             <app-form-input
               formControlName="sku"
@@ -55,14 +54,13 @@
               [errorMessage]="getFieldError('name')"
             ></app-form-input>
 
-            <div class="md:col-span-2">
-              <app-form-input
-                formControlName="description"
+            <app-form-input
+                class="md:col-span-2"
+              formControlName="description"
                 label="Description"
                 placeholder="Enter product description"
                 [errorMessage]="getFieldError('description')"
               ></app-form-input>
-            </div>
           </div>
         </div>
 

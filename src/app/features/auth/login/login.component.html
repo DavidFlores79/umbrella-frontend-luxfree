@@ -57,16 +57,18 @@
         </div>
 
         <!-- Submit Button -->
-        <app-button
-          type="submit"
-          variant="primary"
-          size="md"
-          [fullWidth]="true"
-          [loading]="(loading$ | async) ?? false"
-          [disabled]="(loading$ | async) ?? false">
-          <span *ngIf="!(loading$ | async)">Sign In</span>
-          <span *ngIf="loading$ | async">Signing In...</span>
-        </app-button>
+        <div class="mt-6">
+          <app-button
+            type="submit"
+            variant="primary"
+            size="md"
+            [fullWidth]="true"
+            [loading]="(loading$ | async) ?? false"
+            [disabled]="(loading$ | async) ?? false">
+            <span *ngIf="!(loading$ | async)">Sign In</span>
+            <span *ngIf="loading$ | async">Signing In...</span>
+          </app-button>
+        </div>
       </form>
 
       <!-- Register Link -->

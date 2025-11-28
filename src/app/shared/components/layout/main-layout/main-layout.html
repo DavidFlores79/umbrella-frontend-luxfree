@@ -1,15 +1,28 @@
 <div class="min-h-screen bg-background dark:bg-background-dark-DEFAULT">
   <!-- Header -->
-  <app-header></app-header>
+  <app-header (menuToggle)="toggleMobileMenu()"></app-header>
 
   <!-- Main Content Area -->
-  <div class="flex">
-    <!-- Sidebar -->
-    <app-sidebar></app-sidebar>
+  <div class="flex relative">
+    <!-- Mobile Overlay -->
+    @if (isMobileMenuOpen()) {
+      <div
+        class="fixed inset-0 bg-black/50 z-30 lg:hidden"
+        (click)="closeMobileMenu()">
+      </div>
+    }
+
+    <!-- Sidebar - Hidden on mobile, shown as overlay when menu open -->
+    <div
+      [class]="isMobileMenuOpen()
+        ? 'fixed inset-y-0 left-0 z-40 lg:relative lg:z-0'
+        : 'hidden lg:block'">
+      <app-sidebar (linkClicked)="closeMobileMenu()"></app-sidebar>
+    </div>
 
     <!-- Main Content -->
-    <main class="flex-1 min-w-0">
-      <ng-content></ng-content>
+    <main class="flex-1 min-w-0 w-full">
+      <router-outlet></router-outlet>
     </main>
   </div>
 

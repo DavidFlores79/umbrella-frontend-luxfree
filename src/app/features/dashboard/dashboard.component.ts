@@ -2,13 +2,14 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
+import { filter, take } from 'rxjs';
 
 // Core Services
 import { DashboardStore } from './services/dashboard.store';
 import { CurrencyService } from '../../core/services/currency.service';
+import { CompanyContextService } from '../../core/services/company-context.service';
 
 // Shared Components
-import { MainLayout } from '../../shared/components/layout/main-layout/main-layout';
 import { StatCard } from '../../shared/components/ui/stat-card/stat-card';
 import { Card } from '../../shared/components/ui/card/card';
 import { SkeletonLoader } from '../../shared/components/ui/skeleton-loader/skeleton-loader';
@@ -25,7 +26,6 @@ import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
   imports: [
     CommonModule,
     BaseChartDirective,
-    MainLayout,
     StatCard,
     Card,
     SkeletonLoader,
@@ -39,6 +39,7 @@ import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
 export class DashboardComponent implements OnInit {
   private readonly dashboardStore = inject(DashboardStore);
   private readonly currencyService = inject(CurrencyService);
+  private readonly companyContext = inject(CompanyContextService);
 
   // Observable subscriptions
   readonly viewModel$ = this.dashboardStore.viewModel$;
@@ -83,7 +84,15 @@ export class DashboardComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.dashboardStore.loadDashboardData();
+    // Wait for company context to be available before loading dashboard
+    this.companyContext.currentCompany$
+      .pipe(
+        filter(company => company !== null),
+        take(1)
+      )
+      .subscribe(() => {
+        this.dashboardStore.loadDashboardData();
+      });
   }
 
   onRefresh(): void {

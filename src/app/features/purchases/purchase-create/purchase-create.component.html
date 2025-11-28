@@ -14,9 +14,8 @@
         <div>
           <h3 class="text-lg font-medium text-text mb-4">Vendor Information</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <app-form-select formControlName="companyId" label="Company" [options]="(companyOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('companyId')"></app-form-select>
-            </div>
+            <app-form-select class="md:col-span-2"
+              formControlName="companyId" label="Company" [options]="(companyOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('companyId')"></app-form-select>
             <app-form-input formControlName="vendorName" label="Vendor Name" placeholder="Enter vendor name" [required]="true" [errorMessage]="getFieldError('vendorName')"></app-form-input>
             <app-form-input formControlName="vendorEmail" label="Email" type="email" placeholder="vendor@example.com" [required]="true" [errorMessage]="getFieldError('vendorEmail')"></app-form-input>
             <app-form-input formControlName="vendorPhone" label="Phone" type="tel" placeholder="+1 (555) 123-4567" [errorMessage]="getFieldError('vendorPhone')"></app-form-input>
@@ -31,9 +30,8 @@
           <div formArrayName="items" class="space-y-4">
             <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="md:col-span-2">
-                  <app-form-select formControlName="productId" label="Product" [options]="(productOptions$ | async) || []" [required]="true" (valueChange)="onProductChange(i)"></app-form-select>
-                </div>
+                <app-form-select class="md:col-span-2"
+              formControlName="productId" label="Product" [options]="(productOptions$ | async) || []" [required]="true" (valueChange)="onProductChange(i)"></app-form-select>
                 <app-form-input formControlName="quantity" label="Quantity" type="number" placeholder="1" [required]="true"></app-form-input>
                 <app-form-input formControlName="unitCost" label="Unit Cost" type="number" placeholder="0.00" [required]="true"></app-form-input>
               </div>
@@ -47,9 +45,8 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <app-form-select formControlName="status" label="Status" [options]="statusOptions" [required]="true" [errorMessage]="getFieldError('status')"></app-form-select>
             <app-form-input formControlName="paymentMethod" label="Payment Method" placeholder="e.g., Credit Card, Cash"></app-form-input>
-            <div class="md:col-span-2">
-              <app-form-input formControlName="notes" label="Notes" placeholder="Additional notes"></app-form-input>
-            </div>
+            <app-form-input class="md:col-span-2"
+              formControlName="notes" label="Notes" placeholder="Additional notes"></app-form-input>
           </div>
         </div>
 

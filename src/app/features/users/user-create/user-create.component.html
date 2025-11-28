@@ -45,28 +45,26 @@
               [errorMessage]="getFieldError('lastName')"
             ></app-form-input>
 
-            <div class="md:col-span-2">
-              <app-form-input
-                formControlName="email"
-                label="Email"
-                type="email"
-                placeholder="user@example.com"
-                [required]="true"
-                [errorMessage]="getFieldError('email')"
-              ></app-form-input>
-            </div>
+            <app-form-input
+              class="md:col-span-2"
+              formControlName="email"
+              label="Email"
+              type="email"
+              placeholder="user@example.com"
+              [required]="true"
+              [errorMessage]="getFieldError('email')"
+            ></app-form-input>
 
             @if (!isEditMode) {
-              <div class="md:col-span-2">
-                <app-form-input
-                  formControlName="password"
-                  label="Password"
-                  type="password"
-                  placeholder="Enter password (min 6 characters)"
-                  [required]="true"
-                  [errorMessage]="getFieldError('password')"
-                ></app-form-input>
-              </div>
+              <app-form-input
+                class="md:col-span-2"
+                formControlName="password"
+                label="Password"
+                type="password"
+                placeholder="Enter password (min 6 characters)"
+                [required]="true"
+                [errorMessage]="getFieldError('password')"
+              ></app-form-input>
             }
 
             <app-form-input

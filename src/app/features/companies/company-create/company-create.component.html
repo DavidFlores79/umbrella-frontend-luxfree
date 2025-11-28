@@ -29,15 +29,14 @@
         <div>
           <h3 class="text-lg font-medium text-text mb-4">Basic Information</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <app-form-input
-                formControlName="name"
-                label="Company Name"
-                placeholder="Enter company name"
-                [required]="true"
-                [errorMessage]="getFieldError('name')"
-              ></app-form-input>
-            </div>
+            <app-form-input
+              class="md:col-span-2"
+              formControlName="name"
+              label="Company Name"
+              placeholder="Enter company name"
+              [required]="true"
+              [errorMessage]="getFieldError('name')"
+            ></app-form-input>
 
             <app-form-input
               formControlName="email"
@@ -56,15 +55,14 @@
               [errorMessage]="getFieldError('phone')"
             ></app-form-input>
 
-            <div class="md:col-span-2">
-              <app-form-input
-                formControlName="website"
-                label="Website"
-                type="url"
-                placeholder="https://example.com"
-                [errorMessage]="getFieldError('website')"
-              ></app-form-input>
-            </div>
+            <app-form-input
+              class="md:col-span-2"
+              formControlName="website"
+              label="Website"
+              type="url"
+              placeholder="https://example.com"
+              [errorMessage]="getFieldError('website')"
+            ></app-form-input>
           </div>
         </div>
 
@@ -72,14 +70,13 @@
         <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
           <h3 class="text-lg font-medium text-text mb-4">Address</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <app-form-input
-                formControlName="address"
-                label="Street Address"
-                placeholder="123 Main Street"
-                [errorMessage]="getFieldError('address')"
-              ></app-form-input>
-            </div>
+            <app-form-input
+              class="md:col-span-2"
+              formControlName="address"
+              label="Street Address"
+              placeholder="123 Main Street"
+              [errorMessage]="getFieldError('address')"
+            ></app-form-input>
 
             <app-form-input
               formControlName="city"

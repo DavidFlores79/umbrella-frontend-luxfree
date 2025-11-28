@@ -1,16 +1,15 @@
-<app-main-layout>
-  <div class="p-6 space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
+<div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+  <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-text dark:text-text-dark-DEFAULT">Dashboard</h1>
-        <p class="mt-1 text-sm text-text-light dark:text-text-dark-light">
+        <h1 class="text-xl sm:text-2xl font-bold text-text dark:text-text-dark-DEFAULT">Dashboard</h1>
+        <p class="mt-1 text-xs sm:text-sm text-text-light dark:text-text-dark-light">
           Welcome back! Here's what's happening with your business.
         </p>
       </div>
       <button
         (click)="onRefresh()"
-        class="px-4 py-2 text-sm font-medium text-text dark:text-text-dark-DEFAULT bg-background-secondary dark:bg-background-dark-secondary rounded-lg hover:bg-background-tertiary dark:hover:bg-background-dark-tertiary transition-colors">
+        class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-text dark:text-text-dark-DEFAULT bg-background-secondary dark:bg-background-dark-secondary rounded-lg hover:bg-background-tertiary dark:hover:bg-background-dark-tertiary transition-colors whitespace-nowrap">
         Refresh
       </button>
     </div>
@@ -223,5 +222,4 @@
         </app-card>
       </div>
     </ng-container>
-  </div>
-</app-main-layout>
+</div>

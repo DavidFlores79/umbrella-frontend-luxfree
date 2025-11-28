@@ -83,6 +83,8 @@ export class CompanyContextService {
 
   /**
    * Loads available companies for the current user.
+   * - Admin users can see all companies
+   * - Manager and User roles only see their own company
    */
   loadAvailableCompanies(): Observable<Company[]> {
     const user = this.authService.currentUser;
@@ -99,9 +101,11 @@ export class CompanyContextService {
 
     return this.mockApi.getCompanies().pipe(
       map(companies => {
-        // For now, users only see their own company
-        // In a real app, admins might see multiple companies
-        const userCompanies = companies.filter(c => c.id === user.companyId);
+        // Admins can see all companies, others only see their own
+        const userCompanies = user.role === 'admin'
+          ? companies
+          : companies.filter(c => c.id === user.companyId);
+
         this.patchState({
           availableCompanies: userCompanies,
           loading: false
