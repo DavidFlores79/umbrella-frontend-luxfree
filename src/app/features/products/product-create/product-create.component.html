@@ -1,0 +1,179 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-text">
+      {{ isEditMode ? 'Edit Product' : 'Create Product' }}
+    </h1>
+    <p class="mt-1 text-sm text-text-light">
+      {{ isEditMode ? 'Update product information' : 'Add a new product or service to your catalog' }}
+    </p>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error$ | async; as error) {
+    <app-alert
+      type="error"
+      [dismissible]="true"
+      (dismissed)="dismissError()"
+      class="mb-6"
+    >
+      {{ error }}
+    </app-alert>
+  }
+
+  <!-- Form -->
+  <app-card>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="space-y-6">
+        <!-- Basic Information -->
+        <div>
+          <h3 class="text-lg font-medium text-text mb-4">Basic Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <app-form-select
+                formControlName="companyId"
+                label="Company"
+                [options]="(companyOptions$ | async) || []"
+                [required]="true"
+                [errorMessage]="getFieldError('companyId')"
+              ></app-form-select>
+            </div>
+
+            <app-form-input
+              formControlName="sku"
+              label="SKU"
+              placeholder="e.g., PROD-001"
+              [required]="true"
+              [errorMessage]="getFieldError('sku')"
+            ></app-form-input>
+
+            <app-form-input
+              formControlName="name"
+              label="Product Name"
+              placeholder="Enter product name"
+              [required]="true"
+              [errorMessage]="getFieldError('name')"
+            ></app-form-input>
+
+            <div class="md:col-span-2">
+              <app-form-input
+                formControlName="description"
+                label="Description"
+                placeholder="Enter product description"
+                [errorMessage]="getFieldError('description')"
+              ></app-form-input>
+            </div>
+          </div>
+        </div>
+
+        <!-- Classification -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-text mb-4">Classification</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <app-form-select
+              formControlName="category"
+              label="Category"
+              [options]="categoryOptions"
+              [required]="true"
+              [errorMessage]="getFieldError('category')"
+            ></app-form-select>
+
+            <app-form-select
+              formControlName="type"
+              label="Type"
+              [options]="typeOptions"
+              [required]="true"
+              [errorMessage]="getFieldError('type')"
+            ></app-form-select>
+
+            <app-form-select
+              formControlName="unit"
+              label="Unit of Measure"
+              [options]="unitOptions"
+              [required]="true"
+              [errorMessage]="getFieldError('unit')"
+            ></app-form-select>
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-text mb-4">Pricing</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <app-form-input
+              formControlName="price"
+              label="Sale Price"
+              type="number"
+              placeholder="0.00"
+              [required]="true"
+              [errorMessage]="getFieldError('price')"
+            ></app-form-input>
+
+            <app-form-input
+              formControlName="cost"
+              label="Cost"
+              type="number"
+              placeholder="0.00"
+              [required]="true"
+              [errorMessage]="getFieldError('cost')"
+            ></app-form-input>
+
+            <app-form-input
+              formControlName="taxRate"
+              label="Tax Rate (%)"
+              type="number"
+              placeholder="0.00"
+              [errorMessage]="getFieldError('taxRate')"
+            ></app-form-input>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-text mb-4">Settings</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-form-select
+              formControlName="isActive"
+              label="Status"
+              [options]="statusOptions"
+              [required]="true"
+              [errorMessage]="getFieldError('isActive')"
+            ></app-form-select>
+
+            <div class="flex items-center pt-8">
+              <input
+                type="checkbox"
+                formControlName="trackInventory"
+                id="trackInventory"
+                class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+              />
+              <label for="trackInventory" class="ml-2 block text-sm text-text">
+                Track inventory for this product
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <app-button
+            type="submit"
+            variant="primary"
+            [loading]="(loading$ | async) || false"
+            [disabled]="(loading$ | async) || false"
+          >
+            {{ isEditMode ? 'Update Product' : 'Create Product' }}
+          </app-button>
+          <app-button
+            type="button"
+            variant="secondary"
+            (click)="onCancel()"
+            [disabled]="(loading$ | async) || false"
+          >
+            Cancel
+          </app-button>
+        </div>
+      </div>
+    </form>
+  </app-card>
+</div>

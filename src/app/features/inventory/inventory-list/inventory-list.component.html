@@ -1,0 +1,88 @@
+<div class="p-6">
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-text">Inventory</h1>
+      <p class="mt-1 text-sm text-text-light">Monitor stock levels and inventory movements</p>
+    </div>
+  </div>
+
+  <app-alert *ngIf="error$ | async as error" type="error" [dismissible]="true" (dismissed)="dismissError()" class="mb-6">{{ error }}</app-alert>
+
+  <div class="mb-6">
+    <app-search-bar placeholder="Search inventory by product name, SKU, or location..." (searchChange)="onSearch($event)"></app-search-bar>
+  </div>
+
+  <app-card [loading]="(loading$ | async) || false">
+    <div *ngIf="(filteredItems$ | async) as items; else loading">
+      <div *ngIf="items.length > 0; else empty">
+        <div class="hidden md:block overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">SKU</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Product</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Location</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Quantity</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-text-light uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr *ngFor="let item of items" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm font-medium text-text">{{ item.productSku }}</div></td>
+                <td class="px-6 py-4"><div class="text-sm font-medium text-text">{{ item.productName }}</div></td>
+                <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm text-text-light">{{ item.location }}</div></td>
+                <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm text-text">{{ item.quantity }} / {{ item.maxThreshold }}</div></td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <app-badge [variant]="getStockBadgeVariant(item)">{{ getStockStatus(item) }}</app-badge>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button (click)="onViewDetail(item)" class="text-primary hover:text-primary-700">View Details</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="md:hidden space-y-4">
+          <div *ngFor="let item of items" class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <h3 class="font-medium text-text">{{ item.productName }}</h3>
+                <p class="text-sm text-text-light mt-1">{{ item.productSku }}</p>
+              </div>
+              <app-badge [variant]="getStockBadgeVariant(item)">{{ getStockStatus(item) }}</app-badge>
+            </div>
+            <div class="space-y-2 mb-3">
+              <div class="flex justify-between text-sm">
+                <span class="text-text-light">Location:</span>
+                <span class="text-text">{{ item.location }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-text-light">Quantity:</span>
+                <span class="text-text font-medium">{{ item.quantity }} / {{ item.maxThreshold }}</span>
+              </div>
+            </div>
+            <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <button (click)="onViewDetail(item)" class="flex-1 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-50 dark:hover:bg-gray-800 rounded-md">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #empty>
+      <app-empty-state title="No inventory items found" description="Your inventory is empty"></app-empty-state>
+    </ng-template>
+
+    <ng-template #loading>
+      <div class="p-6">
+        <div class="animate-pulse space-y-4">
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+      </div>
+    </ng-template>
+  </app-card>
+</div>

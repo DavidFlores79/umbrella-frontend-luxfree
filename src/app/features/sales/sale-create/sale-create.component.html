@@ -1,0 +1,65 @@
+<div class="p-6 max-w-6xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-text">{{ isEditMode ? 'Edit Sale' : 'Create Sale' }}</h1>
+    <p class="mt-1 text-sm text-text-light">{{ isEditMode ? 'Update sale information' : 'Create a new sales invoice' }}</p>
+  </div>
+
+  @if (error$ | async; as error) {
+    <app-alert type="error" [dismissible]="true" (dismissed)="dismissError()" class="mb-6">{{ error }}</app-alert>
+  }
+
+  <app-card>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-medium text-text mb-4">Customer Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <app-form-select formControlName="companyId" label="Company" [options]="(companyOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('companyId')"></app-form-select>
+            </div>
+            <app-form-input formControlName="customerName" label="Customer Name" placeholder="Enter customer name" [required]="true" [errorMessage]="getFieldError('customerName')"></app-form-input>
+            <app-form-input formControlName="customerEmail" label="Email" type="email" placeholder="customer@example.com" [required]="true" [errorMessage]="getFieldError('customerEmail')"></app-form-input>
+            <app-form-input formControlName="customerPhone" label="Phone" type="tel" placeholder="+1 (555) 123-4567" [errorMessage]="getFieldError('customerPhone')"></app-form-input>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-text">Line Items</h3>
+            <app-button type="button" variant="secondary" (click)="addLineItem()">+ Add Item</app-button>
+          </div>
+          <div formArrayName="items" class="space-y-4">
+            <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-2">
+                  <app-form-select formControlName="productId" label="Product" [options]="(productOptions$ | async) || []" [required]="true" (valueChange)="onProductChange(i)"></app-form-select>
+                </div>
+                <app-form-input formControlName="quantity" label="Quantity" type="number" placeholder="1" [required]="true"></app-form-input>
+                <app-form-input formControlName="unitPrice" label="Unit Price" type="number" placeholder="0.00" [required]="true"></app-form-input>
+              </div>
+              <button *ngIf="items.length > 1" type="button" (click)="removeLineItem(i)" class="mt-2 text-sm text-accent-red hover:text-red-700">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-text mb-4">Payment Details</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-form-select formControlName="status" label="Status" [options]="statusOptions" [required]="true" [errorMessage]="getFieldError('status')"></app-form-select>
+            <app-form-input formControlName="paymentMethod" label="Payment Method" placeholder="e.g., Credit Card, Cash"></app-form-input>
+            <div class="md:col-span-2">
+              <app-form-input formControlName="notes" label="Notes" placeholder="Additional notes"></app-form-input>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <app-button type="submit" variant="primary" [loading]="(loading$ | async) || false" [disabled]="(loading$ | async) || false">
+            {{ isEditMode ? 'Update Sale' : 'Create Sale' }}
+          </app-button>
+          <app-button type="button" variant="secondary" (click)="onCancel()" [disabled]="(loading$ | async) || false">Cancel</app-button>
+        </div>
+      </div>
+    </form>
+  </app-card>
+</div>

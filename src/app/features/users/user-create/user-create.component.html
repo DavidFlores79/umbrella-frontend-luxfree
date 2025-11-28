@@ -1,0 +1,134 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-text">
+      {{ isEditMode ? 'Edit User' : 'Create User' }}
+    </h1>
+    <p class="mt-1 text-sm text-text-light">
+      {{ isEditMode ? 'Update user information' : 'Add a new user to your account' }}
+    </p>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error$ | async; as error) {
+    <app-alert
+      type="error"
+      [dismissible]="true"
+      (dismissed)="dismissError()"
+      class="mb-6"
+    >
+      {{ error }}
+    </app-alert>
+  }
+
+  <!-- Form -->
+  <app-card>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="space-y-6">
+        <!-- Basic Information -->
+        <div>
+          <h3 class="text-lg font-medium text-text mb-4">Basic Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-form-input
+              formControlName="firstName"
+              label="First Name"
+              placeholder="Enter first name"
+              [required]="true"
+              [errorMessage]="getFieldError('firstName')"
+            ></app-form-input>
+
+            <app-form-input
+              formControlName="lastName"
+              label="Last Name"
+              placeholder="Enter last name"
+              [required]="true"
+              [errorMessage]="getFieldError('lastName')"
+            ></app-form-input>
+
+            <div class="md:col-span-2">
+              <app-form-input
+                formControlName="email"
+                label="Email"
+                type="email"
+                placeholder="user@example.com"
+                [required]="true"
+                [errorMessage]="getFieldError('email')"
+              ></app-form-input>
+            </div>
+
+            @if (!isEditMode) {
+              <div class="md:col-span-2">
+                <app-form-input
+                  formControlName="password"
+                  label="Password"
+                  type="password"
+                  placeholder="Enter password (min 6 characters)"
+                  [required]="true"
+                  [errorMessage]="getFieldError('password')"
+                ></app-form-input>
+              </div>
+            }
+
+            <app-form-input
+              formControlName="phone"
+              label="Phone"
+              type="tel"
+              placeholder="+1 (555) 123-4567"
+              [errorMessage]="getFieldError('phone')"
+            ></app-form-input>
+          </div>
+        </div>
+
+        <!-- Company & Role -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-text mb-4">Company & Role</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-form-select
+              formControlName="companyId"
+              label="Company"
+              [options]="(companyOptions$ | async) || []"
+              [required]="true"
+              [errorMessage]="getFieldError('companyId')"
+            ></app-form-select>
+
+            <app-form-select
+              formControlName="role"
+              label="Role"
+              [options]="roleOptions"
+              [required]="true"
+              [errorMessage]="getFieldError('role')"
+            ></app-form-select>
+
+            <app-form-select
+              formControlName="isActive"
+              label="Active Status"
+              [options]="statusOptions"
+              [required]="true"
+              [errorMessage]="getFieldError('isActive')"
+            ></app-form-select>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <app-button
+            type="submit"
+            variant="primary"
+            [loading]="(loading$ | async) || false"
+            [disabled]="(loading$ | async) || false"
+          >
+            {{ isEditMode ? 'Update User' : 'Create User' }}
+          </app-button>
+          <app-button
+            type="button"
+            variant="secondary"
+            (click)="onCancel()"
+            [disabled]="(loading$ | async) || false"
+          >
+            Cancel
+          </app-button>
+        </div>
+      </div>
+    </form>
+  </app-card>
+</div>

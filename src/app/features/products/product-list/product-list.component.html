@@ -1,0 +1,186 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-text">Products & Services</h1>
+      <p class="mt-1 text-sm text-text-light">Manage your product catalog and services</p>
+    </div>
+    <app-button variant="primary" (click)="onCreate()">
+      <span class="mr-2">+</span>
+      Create Product
+    </app-button>
+  </div>
+
+  <!-- Error Alert -->
+  <app-alert
+    *ngIf="error$ | async as error"
+    type="error"
+    [dismissible]="true"
+    (dismissed)="dismissError()"
+    class="mb-6"
+  >
+    {{ error }}
+  </app-alert>
+
+  <!-- Search Bar -->
+  <div class="mb-6">
+    <app-search-bar
+      placeholder="Search products by name, SKU, category, or description..."
+      (searchChange)="onSearch($event)"
+    ></app-search-bar>
+  </div>
+
+  <!-- Products Table -->
+  <app-card [loading]="(loading$ | async) || false">
+    <div *ngIf="(filteredProducts$ | async) as products; else loading">
+      <div *ngIf="products.length > 0; else empty">
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  SKU
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Name
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Category
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Type
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Price
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-text-light uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr *ngFor="let product of products" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-text">{{ product.sku }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-text">{{ product.name }}</div>
+                  <div class="text-xs text-text-light mt-1">{{ product.description }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <app-badge [variant]="getCategoryBadgeVariant(product.category)">
+                    {{ product.category | uppercase }}
+                  </app-badge>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <app-badge [variant]="getTypeBadgeVariant(product.type)">
+                    {{ product.type | uppercase }}
+                  </app-badge>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-text">{{ product.price | appCurrency }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <app-badge [variant]="getStatusBadgeVariant(product.isActive)">
+                    {{ product.isActive ? 'ACTIVE' : 'INACTIVE' }}
+                  </app-badge>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    (click)="onEdit(product)"
+                    class="text-primary hover:text-primary-700 mr-4"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    (click)="onDelete(product)"
+                    class="text-accent-red hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="md:hidden space-y-4">
+          <div
+            *ngFor="let product of products"
+            class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <h3 class="font-medium text-text">{{ product.name }}</h3>
+                <p class="text-sm text-text-light mt-1">{{ product.sku }}</p>
+              </div>
+              <div class="flex gap-2">
+                <app-badge [variant]="getStatusBadgeVariant(product.isActive)">
+                  {{ product.isActive ? 'Active' : 'Inactive' }}
+                </app-badge>
+              </div>
+            </div>
+
+            <div class="space-y-2 mb-3">
+              <div class="flex justify-between text-sm">
+                <span class="text-text-light">Category:</span>
+                <app-badge [variant]="getCategoryBadgeVariant(product.category)">
+                  {{ product.category }}
+                </app-badge>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-text-light">Type:</span>
+                <app-badge [variant]="getTypeBadgeVariant(product.type)">
+                  {{ product.type }}
+                </app-badge>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-text-light">Price:</span>
+                <span class="text-text font-medium">{{ product.price | appCurrency }}</span>
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <button
+                (click)="onEdit(product)"
+                class="flex-1 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-50 dark:hover:bg-gray-800 rounded-md"
+              >
+                Edit
+              </button>
+              <button
+                (click)="onDelete(product)"
+                class="flex-1 px-4 py-2 text-sm font-medium text-accent-red hover:bg-red-50 dark:hover:bg-gray-800 rounded-md"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #empty>
+      <app-empty-state
+        title="No products found"
+        description="Get started by creating your first product"
+        [actionLabel]="'Create Product'"
+        (action)="onCreate()"
+      ></app-empty-state>
+    </ng-template>
+
+    <ng-template #loading>
+      <div class="p-6">
+        <div class="animate-pulse space-y-4">
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+      </div>
+    </ng-template>
+  </app-card>
+</div>

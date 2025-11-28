@@ -1,0 +1,122 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-text">Sales</h1>
+      <p class="mt-1 text-sm text-text-light">Manage sales invoices and transactions</p>
+    </div>
+    <app-button variant="primary" (click)="onCreate()">
+      <span class="mr-2">+</span>
+      Create Sale
+    </app-button>
+  </div>
+
+  <!-- Error Alert -->
+  <app-alert
+    *ngIf="error$ | async as error"
+    type="error"
+    [dismissible]="true"
+    (dismissed)="dismissError()"
+    class="mb-6"
+  >
+    {{ error }}
+  </app-alert>
+
+  <!-- Search Bar -->
+  <div class="mb-6">
+    <app-search-bar
+      placeholder="Search sales by invoice number, customer name, email, or status..."
+      (searchChange)="onSearch($event)"
+    ></app-search-bar>
+  </div>
+
+  <!-- Sales Table -->
+  <app-card [loading]="(loading$ | async) || false">
+    <div *ngIf="(filteredSales$ | async) as sales; else loading">
+      <div *ngIf="sales.length > 0; else empty">
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Invoice</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Customer</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Total</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-text-light uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr *ngFor="let sale of sales" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-text">{{ sale.invoiceNumber }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-text">{{ sale.customerName }}</div>
+                  <div class="text-xs text-text-light mt-1">{{ sale.customerEmail }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-text">{{ sale.total | appCurrency }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <app-badge [variant]="getStatusBadgeVariant(sale.status)">
+                    {{ sale.status | uppercase }}
+                  </app-badge>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-text-light">{{ sale.createdAt | appDateFormat }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button (click)="onEdit(sale)" class="text-primary hover:text-primary-700 mr-4">Edit</button>
+                  <button (click)="onDelete(sale)" class="text-accent-red hover:text-red-700">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="md:hidden space-y-4">
+          <div *ngFor="let sale of sales" class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <h3 class="font-medium text-text">{{ sale.invoiceNumber }}</h3>
+                <p class="text-sm text-text-light mt-1">{{ sale.customerName }}</p>
+              </div>
+              <app-badge [variant]="getStatusBadgeVariant(sale.status)">{{ sale.status }}</app-badge>
+            </div>
+            <div class="space-y-2 mb-3">
+              <div class="flex justify-between text-sm">
+                <span class="text-text-light">Total:</span>
+                <span class="text-text font-medium">{{ sale.total | appCurrency }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-text-light">Date:</span>
+                <span class="text-text">{{ sale.createdAt | appDateFormat }}</span>
+              </div>
+            </div>
+            <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <button (click)="onEdit(sale)" class="flex-1 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-50 dark:hover:bg-gray-800 rounded-md">Edit</button>
+              <button (click)="onDelete(sale)" class="flex-1 px-4 py-2 text-sm font-medium text-accent-red hover:bg-red-50 dark:hover:bg-gray-800 rounded-md">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #empty>
+      <app-empty-state title="No sales found" description="Get started by creating your first sale" [actionLabel]="'Create Sale'" (action)="onCreate()"></app-empty-state>
+    </ng-template>
+
+    <ng-template #loading>
+      <div class="p-6">
+        <div class="animate-pulse space-y-4">
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+      </div>
+    </ng-template>
+  </app-card>
+</div>
