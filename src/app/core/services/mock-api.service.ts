@@ -91,6 +91,7 @@ export class MockApiService {
       id: this.generateId(),
       ...dto,
       settings: this.getDefaultCompanySettings(dto.settings),
+      status: 'active',
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -270,6 +271,7 @@ export class MockApiService {
       id: this.generateId(),
       ...companyDto,
       settings: this.getDefaultCompanySettings(),
+      status: 'active',
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -915,6 +917,7 @@ export class MockApiService {
   private getDefaultCompanySettings(settings?: Partial<CompanySettings>): CompanySettings {
     return {
       currency: settings?.currency ?? 'USD',
+      plan: (settings as any)?.plan ?? 'free',
       timezone: settings?.timezone ?? 'America/New_York',
       dateFormat: settings?.dateFormat ?? 'MM/DD/YYYY',
       fiscalYearStart: settings?.fiscalYearStart ?? '01-01',
@@ -1032,7 +1035,8 @@ export class MockApiService {
         postalCode: '94105',
         taxId: 'US123456789',
         website: 'https://techsolutions.com',
-        settings: this.getDefaultCompanySettings({ currency: 'USD' }),
+        settings: this.getDefaultCompanySettings({ currency: 'USD', plan: 'premium' } as any),
+        status: 'active',
         isActive: true,
         createdAt: new Date('2023-01-15'),
         updatedAt: new Date('2025-01-01')
@@ -1049,7 +1053,8 @@ export class MockApiService {
         postalCode: 'SW1A 1AA',
         taxId: 'GB987654321',
         website: 'https://globaltraders.com',
-        settings: this.getDefaultCompanySettings({ currency: 'GBP' }),
+        settings: this.getDefaultCompanySettings({ currency: 'GBP', plan: 'basic' } as any),
+        status: 'active',
         isActive: true,
         createdAt: new Date('2023-03-20'),
         updatedAt: new Date('2025-01-01')
@@ -1065,7 +1070,8 @@ export class MockApiService {
         country: 'Mexico',
         postalCode: '06600',
         taxId: 'MX112233445566',
-        settings: this.getDefaultCompanySettings({ currency: 'MXN' }),
+        settings: this.getDefaultCompanySettings({ currency: 'MXN', plan: 'free' } as any),
+        status: 'active',
         isActive: true,
         createdAt: new Date('2023-06-10'),
         updatedAt: new Date('2025-01-01')

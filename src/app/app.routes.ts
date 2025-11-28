@@ -22,6 +22,13 @@ export const routes: Routes = [
       .then(m => m.DASHBOARD_ROUTES)
   },
 
+  // Companies routes (protected)
+  {
+    path: 'companies',
+    loadChildren: () => import('./features/companies/companies.routes')
+      .then(m => m.COMPANIES_ROUTES)
+  },
+
   // Fallback route - redirect to login
   {
     path: '**',

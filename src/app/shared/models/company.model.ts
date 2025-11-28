@@ -15,6 +15,7 @@ export interface Company {
   website?: string;
   logo?: string;
   settings: CompanySettings;
+  status: 'active' | 'inactive';
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,7 @@ export interface Company {
  */
 export interface CompanySettings {
   currency: Currency;
+  plan: 'free' | 'basic' | 'premium';
   timezone: string;
   dateFormat: string;
   fiscalYearStart: string; // Format: 'MM-DD'
@@ -63,5 +65,6 @@ export interface CreateCompanyDto {
 export interface UpdateCompanyDto extends Partial<CreateCompanyDto> {
   id: string;
   settings?: Partial<CompanySettings>;
+  status?: 'active' | 'inactive';
   isActive?: boolean;
 }
