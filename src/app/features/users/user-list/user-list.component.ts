@@ -2,6 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UsersStore } from '../services/users.store';
+import { MockApiService } from '../../../core/services/mock-api.service';
+import { PermissionService } from '../../../core/services/permission.service';
+import { CompanyContextService } from '../../../core/services/company-context.service';
 import { SearchBar } from '../../../shared/components/data/search-bar/search-bar';
 import { Card } from '../../../shared/components/ui/card/card';
 import { Button } from '../../../shared/components/ui/button/button';
@@ -10,7 +13,9 @@ import { Alert } from '../../../shared/components/ui/alert/alert';
 import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { User } from '../../../shared/models/user.model';
-import { map } from 'rxjs/operators';
+import { Company } from '../../../shared/models/company.model';
+import { map, switchMap, combineLatestWith } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-user-list',
@@ -30,14 +35,41 @@ import { map } from 'rxjs/operators';
 export class UserListComponent implements OnInit {
   private readonly store = inject(UsersStore);
   private readonly router = inject(Router);
+  private readonly mockApi = inject(MockApiService);
+  private readonly permissions = inject(PermissionService);
+  private readonly companyContext = inject(CompanyContextService);
 
   readonly users$ = this.store.users$;
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
 
+  companies$: Observable<Company[]> = of([]);
+  usersWithCompany$: Observable<(User & { companyName?: string })[]> = of([]);
+
   searchTerm = '';
 
-  readonly filteredUsers$ = this.users$.pipe(
+  ngOnInit(): void {
+    // Load companies
+    this.companies$ = this.mockApi.getCompanies();
+
+    // Combine users with company names
+    this.usersWithCompany$ = this.users$.pipe(
+      combineLatestWith(this.companies$),
+      map(([users, companies]) => {
+        return users.map(user => ({
+          ...user,
+          companyName: companies.find(c => c.id === user.companyId)?.name || 'Unknown'
+        }));
+      })
+    );
+
+    console.log('🔍 Current user role:', this.permissions.isAdmin() ? 'ADMIN' : 'NON-ADMIN');
+    console.log('🏢 Current company ID:', this.companyContext.currentCompanyId);
+
+    this.store.loadUsers();
+  }
+
+  readonly filteredUsers$ = this.usersWithCompany$.pipe(
     map(users => {
       if (!this.searchTerm) {
         return users;
@@ -47,7 +79,8 @@ export class UserListComponent implements OnInit {
         user.firstName.toLowerCase().includes(term) ||
         user.lastName.toLowerCase().includes(term) ||
         user.email.toLowerCase().includes(term) ||
-        user.role.toLowerCase().includes(term)
+        user.role.toLowerCase().includes(term) ||
+        user.companyName?.toLowerCase().includes(term)
       );
     })
   );
@@ -55,15 +88,12 @@ export class UserListComponent implements OnInit {
   readonly columns = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'email', label: 'Email', sortable: true },
+    { key: 'company', label: 'Company', sortable: true },
     { key: 'role', label: 'Role', sortable: true },
     { key: 'status', label: 'Status', sortable: true },
     { key: 'createdAt', label: 'Created', sortable: true },
     { key: 'actions', label: 'Actions', sortable: false }
   ];
-
-  ngOnInit(): void {
-    this.store.loadUsers();
-  }
 
   onSearch(term: string): void {
     this.searchTerm = term;

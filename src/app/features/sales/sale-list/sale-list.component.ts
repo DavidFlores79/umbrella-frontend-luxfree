@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SalesStore } from '../services/sales.store';
+import { PermissionService } from '../../../core/services/permission.service';
+import { CompanyContextService } from '../../../core/services/company-context.service';
 import { SearchBar } from '../../../shared/components/data/search-bar/search-bar';
 import { Card } from '../../../shared/components/ui/card/card';
 import { Button } from '../../../shared/components/ui/button/button';
@@ -32,6 +34,8 @@ import { map } from 'rxjs/operators';
 export class SaleListComponent implements OnInit {
   private readonly store = inject(SalesStore);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionService);
+  private readonly companyContext = inject(CompanyContextService);
 
   readonly sales$ = this.store.sales$;
   readonly loading$ = this.store.loading$;
@@ -55,7 +59,20 @@ export class SaleListComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    console.log('🔍 [SALES] Current user role:', this.permissions.isAdmin() ? 'ADMIN' : 'NON-ADMIN');
+    console.log('🏢 [SALES] Current company ID:', this.companyContext.currentCompanyId);
+
     this.store.loadSales();
+
+    // Log sales to verify filtering
+    this.sales$.subscribe(sales => {
+      console.log('💰 [SALES] Loaded sales count:', sales.length);
+      if (sales.length > 0) {
+        console.log('💰 [SALES] Sample sale companies:',
+          sales.slice(0, 3).map(s => ({ invoice: s.invoiceNumber, companyId: s.companyId }))
+        );
+      }
+    });
   }
 
   onSearch(term: string): void {

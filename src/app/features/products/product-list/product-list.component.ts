@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProductsStore } from '../services/products.store';
+import { PermissionService } from '../../../core/services/permission.service';
+import { CompanyContextService } from '../../../core/services/company-context.service';
 import { SearchBar } from '../../../shared/components/data/search-bar/search-bar';
 import { Card } from '../../../shared/components/ui/card/card';
 import { Button } from '../../../shared/components/ui/button/button';
@@ -30,6 +32,8 @@ import { map } from 'rxjs/operators';
 export class ProductListComponent implements OnInit {
   private readonly store = inject(ProductsStore);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionService);
+  private readonly companyContext = inject(CompanyContextService);
 
   readonly products$ = this.store.products$;
   readonly loading$ = this.store.loading$;
@@ -63,7 +67,20 @@ export class ProductListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    console.log('🔍 [PRODUCTS] Current user role:', this.permissions.isAdmin() ? 'ADMIN' : 'NON-ADMIN');
+    console.log('🏢 [PRODUCTS] Current company ID:', this.companyContext.currentCompanyId);
+
     this.store.loadProducts();
+
+    // Log products to verify filtering
+    this.products$.subscribe(products => {
+      console.log('📦 [PRODUCTS] Loaded products count:', products.length);
+      if (products.length > 0) {
+        console.log('📦 [PRODUCTS] Sample product companies:',
+          products.slice(0, 3).map(p => ({ name: p.name, companyId: p.companyId }))
+        );
+      }
+    });
   }
 
   onSearch(term: string): void {
