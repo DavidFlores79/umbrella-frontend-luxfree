@@ -3,45 +3,46 @@ import { StoreBase } from '../../../core/services/store-base.service';
 import { MockApiService } from '../../../core/services/mock-api.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { CompanyContextService } from '../../../core/services/company-context.service';
-import { User } from '../../../shared/models/user.model';
+import { Client } from '../../../shared/models/client.model';
 import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-interface UsersState {
-  users: User[];
+interface ClientsState {
+  clients: Client[];
   loading: boolean;
   error: string | null;
-  selectedUser: User | null;
+  selectedClient: Client | null;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class UsersStore extends StoreBase<UsersState> {
+export class ClientsStore extends StoreBase<ClientsState> {
   private readonly mockApi = inject(MockApiService);
   private readonly permissions = inject(PermissionService);
   private readonly companyContext = inject(CompanyContextService);
 
   // Selectors
-  readonly users$ = this.select(state => state.users);
+  readonly clients$ = this.select(state => state.clients);
   readonly loading$ = this.select(state => state.loading);
   readonly error$ = this.select(state => state.error);
-  readonly selectedUser$ = this.select(state => state.selectedUser);
+  readonly selectedClient$ = this.select(state => state.selectedClient);
 
   constructor() {
     super({
-      users: [],
+      clients: [],
       loading: false,
       error: null,
-      selectedUser: null
+      selectedClient: null
     });
 
-    // Auto-reload users when company changes
+    // Auto-reload clients when company changes
     this.setupCompanyChangeReload();
   }
 
   /**
-   * Gets the company ID for filtering users based on user role.
+   * Gets the company ID for filtering clients based on user role.
+   * Admins see all companies, other users see only their company.
    */
   private getCompanyIdForFiltering(): string | undefined {
     return this.permissions.isAdmin()
@@ -57,25 +58,25 @@ export class UsersStore extends StoreBase<UsersState> {
       distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
       skip(1) // Skip initial value to avoid double-loading
     ).subscribe(() => {
-      this.loadUsers();
+      this.loadClients();
     });
   }
 
-  loadUsers(): void {
+  loadClients(): void {
     const companyId = this.getCompanyIdForFiltering();
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.getUsers(companyId).pipe(
-      tap(users => {
+    this.mockApi.getClients(companyId).pipe(
+      tap(clients => {
         this.patchState({
-          users,
+          clients,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to load users',
+          error: err.message || 'Failed to load clients',
           loading: false
         });
         return of([]);
@@ -83,21 +84,21 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  createUser(user: Partial<User>): void {
+  createClient(client: Partial<Client>): void {
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.createUser(user as any).pipe(
-      tap(newUser => {
-        const users = [...this.currentState.users, newUser];
+    this.mockApi.createClient(client as any).pipe(
+      tap(newClient => {
+        const clients = [...this.currentState.clients, newClient];
         this.patchState({
-          users,
+          clients,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to create user',
+          error: err.message || 'Failed to create client',
           loading: false
         });
         throw err;
@@ -105,24 +106,24 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  updateUser(id: string, updates: Partial<User>): void {
+  updateClient(id: string, updates: Partial<Client>): void {
     this.patchState({ loading: true, error: null });
 
     const updateDto = { id, ...updates };
-    this.mockApi.updateUser(updateDto as any).pipe(
-      tap(updatedUser => {
-        const users = this.currentState.users.map((u: User) =>
-          u.id === id ? updatedUser : u
+    this.mockApi.updateClient(updateDto as any).pipe(
+      tap(updatedClient => {
+        const clients = this.currentState.clients.map((c: Client) =>
+          c.id === id ? updatedClient : c
         );
         this.patchState({
-          users,
+          clients,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to update user',
+          error: err.message || 'Failed to update client',
           loading: false
         });
         throw err;
@@ -130,21 +131,21 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  deleteUser(id: string): void {
+  deleteClient(id: string): void {
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.deleteUser(id).pipe(
+    this.mockApi.deleteClient(id).pipe(
       tap(() => {
-        const users = this.currentState.users.filter((u: User) => u.id !== id);
+        const clients = this.currentState.clients.filter((c: Client) => c.id !== id);
         this.patchState({
-          users,
+          clients,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to delete user',
+          error: err.message || 'Failed to delete client',
           loading: false
         });
         throw err;
@@ -152,9 +153,9 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  selectUser(id: string): void {
-    const user = this.currentState.users.find((u: User) => u.id === id);
-    this.patchState({ selectedUser: user || null });
+  selectClient(id: string): void {
+    const client = this.currentState.clients.find((c: Client) => c.id === id);
+    this.patchState({ selectedClient: client || null });
   }
 
   clearError(): void {

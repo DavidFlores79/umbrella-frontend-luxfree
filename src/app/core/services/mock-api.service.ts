@@ -40,6 +40,16 @@ import {
   UpdateInventoryItemDto,
   CreateInventoryMovementDto
 } from '../../shared/models/inventory.model';
+import {
+  Vendor,
+  CreateVendorDto,
+  UpdateVendorDto
+} from '../../shared/models/vendor.model';
+import {
+  Client,
+  CreateClientDto,
+  UpdateClientDto
+} from '../../shared/models/client.model';
 
 /**
  * Mock API service that simulates a backend API using localStorage.
@@ -59,7 +69,9 @@ export class MockApiService {
     purchases: 'umbrella_purchases',
     inventory: 'umbrella_inventory',
     movements: 'umbrella_movements',
-    alerts: 'umbrella_alerts'
+    alerts: 'umbrella_alerts',
+    vendors: 'umbrella_vendors',
+    clients: 'umbrella_clients'
   };
 
   constructor() {
@@ -895,6 +907,154 @@ export class MockApiService {
     return of(void 0).pipe(delay(this.DELAY_MS));
   }
 
+  // ==================== VENDORS ====================
+
+  getVendors(companyId?: string): Observable<Vendor[]> {
+    let vendors = this.getFromStorage<Vendor>(this.STORAGE_KEYS.vendors);
+
+    if (companyId) {
+      vendors = vendors.filter(v => v.companyId === companyId);
+    }
+
+    return of(vendors).pipe(delay(this.DELAY_MS));
+  }
+
+  getVendor(id: string): Observable<Vendor> {
+    const vendors = this.getFromStorage<Vendor>(this.STORAGE_KEYS.vendors);
+    const vendor = vendors.find(v => v.id === id);
+
+    if (!vendor) {
+      return throwError(() => new Error('Vendor not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    return of(vendor).pipe(delay(this.DELAY_MS));
+  }
+
+  createVendor(dto: CreateVendorDto): Observable<Vendor> {
+    const vendors = this.getFromStorage<Vendor>(this.STORAGE_KEYS.vendors);
+
+    const newVendor: Vendor = {
+      id: this.generateId(),
+      ...dto,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    vendors.push(newVendor);
+    this.saveToStorage(this.STORAGE_KEYS.vendors, vendors);
+
+    return of(newVendor).pipe(delay(this.DELAY_MS));
+  }
+
+  updateVendor(dto: UpdateVendorDto): Observable<Vendor> {
+    const vendors = this.getFromStorage<Vendor>(this.STORAGE_KEYS.vendors);
+    const index = vendors.findIndex(v => v.id === dto.id);
+
+    if (index === -1) {
+      return throwError(() => new Error('Vendor not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    const updated: Vendor = {
+      ...vendors[index],
+      ...dto,
+      updatedAt: new Date()
+    };
+
+    vendors[index] = updated;
+    this.saveToStorage(this.STORAGE_KEYS.vendors, vendors);
+
+    return of(updated).pipe(delay(this.DELAY_MS));
+  }
+
+  deleteVendor(id: string): Observable<void> {
+    const vendors = this.getFromStorage<Vendor>(this.STORAGE_KEYS.vendors);
+    const index = vendors.findIndex(v => v.id === id);
+
+    if (index === -1) {
+      return throwError(() => new Error('Vendor not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    vendors.splice(index, 1);
+    this.saveToStorage(this.STORAGE_KEYS.vendors, vendors);
+
+    return of(void 0).pipe(delay(this.DELAY_MS));
+  }
+
+  // ==================== CLIENTS ====================
+
+  getClients(companyId?: string): Observable<Client[]> {
+    let clients = this.getFromStorage<Client>(this.STORAGE_KEYS.clients);
+
+    if (companyId) {
+      clients = clients.filter(c => c.companyId === companyId);
+    }
+
+    return of(clients).pipe(delay(this.DELAY_MS));
+  }
+
+  getClient(id: string): Observable<Client> {
+    const clients = this.getFromStorage<Client>(this.STORAGE_KEYS.clients);
+    const client = clients.find(c => c.id === id);
+
+    if (!client) {
+      return throwError(() => new Error('Client not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    return of(client).pipe(delay(this.DELAY_MS));
+  }
+
+  createClient(dto: CreateClientDto): Observable<Client> {
+    const clients = this.getFromStorage<Client>(this.STORAGE_KEYS.clients);
+
+    const newClient: Client = {
+      id: this.generateId(),
+      ...dto,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    clients.push(newClient);
+    this.saveToStorage(this.STORAGE_KEYS.clients, clients);
+
+    return of(newClient).pipe(delay(this.DELAY_MS));
+  }
+
+  updateClient(dto: UpdateClientDto): Observable<Client> {
+    const clients = this.getFromStorage<Client>(this.STORAGE_KEYS.clients);
+    const index = clients.findIndex(c => c.id === dto.id);
+
+    if (index === -1) {
+      return throwError(() => new Error('Client not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    const updated: Client = {
+      ...clients[index],
+      ...dto,
+      updatedAt: new Date()
+    };
+
+    clients[index] = updated;
+    this.saveToStorage(this.STORAGE_KEYS.clients, clients);
+
+    return of(updated).pipe(delay(this.DELAY_MS));
+  }
+
+  deleteClient(id: string): Observable<void> {
+    const clients = this.getFromStorage<Client>(this.STORAGE_KEYS.clients);
+    const index = clients.findIndex(c => c.id === id);
+
+    if (index === -1) {
+      return throwError(() => new Error('Client not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    clients.splice(index, 1);
+    this.saveToStorage(this.STORAGE_KEYS.clients, clients);
+
+    return of(void 0).pipe(delay(this.DELAY_MS));
+  }
+
   // ==================== HELPER METHODS ====================
 
   private getFromStorage<T>(key: string): T[] {
@@ -1017,6 +1177,8 @@ export class MockApiService {
     this.seedCompanies();
     this.seedUsers();
     this.seedProducts();
+    this.seedVendors();
+    this.seedClients();
     this.seedSales();
     this.seedPurchases();
   }
@@ -1477,5 +1639,172 @@ export class MockApiService {
     purchases.push(purchase1);
 
     this.saveToStorage(this.STORAGE_KEYS.purchases, purchases);
+  }
+
+  private seedVendors(): void {
+    const vendors: Vendor[] = [
+      {
+        id: 'vendor-1',
+        companyId: 'company-1',
+        name: 'Tech Distributor Inc.',
+        email: 'sales@techdist.com',
+        phone: '+1 (555) 300-0001',
+        address: '123 Tech Street, Silicon Valley, CA 94025',
+        taxId: 'TAX-001-TECH',
+        notes: 'Primary supplier for computer hardware and peripherals',
+        isActive: true,
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date('2024-01-15')
+      },
+      {
+        id: 'vendor-2',
+        companyId: 'company-1',
+        name: 'Office Supplies Plus',
+        email: 'orders@officesupplies.com',
+        phone: '+1 (555) 300-0002',
+        address: '456 Office Way, Business City, NY 10001',
+        taxId: 'TAX-002-OFFICE',
+        notes: 'Office furniture and supplies',
+        isActive: true,
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date('2024-02-01')
+      },
+      {
+        id: 'vendor-3',
+        companyId: 'company-1',
+        name: 'Global Electronics',
+        email: 'contact@globalelec.com',
+        phone: '+1 (555) 300-0003',
+        address: '789 Electronics Blvd, Tech City, TX 75001',
+        taxId: 'TAX-003-ELEC',
+        isActive: true,
+        createdAt: new Date('2024-03-01'),
+        updatedAt: new Date('2024-03-01')
+      },
+      {
+        id: 'vendor-4',
+        companyId: 'company-2',
+        name: 'Premium Restaurant Supply',
+        email: 'sales@premiumsupply.com',
+        phone: '+1 (555) 400-0001',
+        address: '321 Restaurant Row, Culinary City, FL 33101',
+        taxId: 'TAX-004-REST',
+        notes: 'Kitchen equipment and supplies',
+        isActive: true,
+        createdAt: new Date('2024-01-20'),
+        updatedAt: new Date('2024-01-20')
+      },
+      {
+        id: 'vendor-5',
+        companyId: 'company-2',
+        name: 'Fresh Food Distributors',
+        email: 'orders@freshfood.com',
+        phone: '+1 (555) 400-0002',
+        address: '654 Food Street, Market Town, IL 60601',
+        taxId: 'TAX-005-FOOD',
+        notes: 'Fresh ingredients and produce',
+        isActive: true,
+        createdAt: new Date('2024-02-10'),
+        updatedAt: new Date('2024-02-10')
+      },
+      {
+        id: 'vendor-6',
+        companyId: 'company-3',
+        name: 'Professional Services Group',
+        email: 'info@proservices.com',
+        phone: '+1 (555) 500-0001',
+        address: '987 Business Ave, Corporate City, WA 98101',
+        taxId: 'TAX-006-PRO',
+        isActive: true,
+        createdAt: new Date('2024-01-25'),
+        updatedAt: new Date('2024-01-25')
+      }
+    ];
+
+    this.saveToStorage(this.STORAGE_KEYS.vendors, vendors);
+  }
+
+  private seedClients(): void {
+    const clients: Client[] = [
+      {
+        id: 'client-1',
+        companyId: 'company-1',
+        name: 'ABC Corporation',
+        email: 'purchasing@abccorp.com',
+        phone: '+1 (555) 100-0001',
+        address: '100 Corporate Plaza, Business District, CA 90001',
+        taxId: 'TAX-CLIENT-001',
+        notes: 'Regular corporate client - Net 30 payment terms',
+        isActive: true,
+        createdAt: new Date('2024-01-10'),
+        updatedAt: new Date('2024-01-10')
+      },
+      {
+        id: 'client-2',
+        companyId: 'company-1',
+        name: 'XYZ Enterprises',
+        email: 'accounts@xyzent.com',
+        phone: '+1 (555) 100-0002',
+        address: '200 Enterprise Way, Commerce City, CA 90002',
+        taxId: 'TAX-CLIENT-002',
+        notes: 'VIP client - priority shipping',
+        isActive: true,
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date('2024-01-15')
+      },
+      {
+        id: 'client-3',
+        companyId: 'company-1',
+        name: 'Tech Startup LLC',
+        email: 'billing@techstartup.com',
+        phone: '+1 (555) 100-0003',
+        address: '300 Innovation Drive, Startup Valley, CA 94025',
+        taxId: 'TAX-CLIENT-003',
+        isActive: true,
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date('2024-02-01')
+      },
+      {
+        id: 'client-4',
+        companyId: 'company-2',
+        name: 'Event Planning Pros',
+        email: 'catering@eventpros.com',
+        phone: '+1 (555) 200-0001',
+        address: '400 Event Street, Party City, FL 33102',
+        taxId: 'TAX-CLIENT-004',
+        notes: 'Regular catering orders for corporate events',
+        isActive: true,
+        createdAt: new Date('2024-01-20'),
+        updatedAt: new Date('2024-01-20')
+      },
+      {
+        id: 'client-5',
+        companyId: 'company-2',
+        name: 'Downtown Hotel Group',
+        email: 'purchasing@downtownhotel.com',
+        phone: '+1 (555) 200-0002',
+        address: '500 Hotel Avenue, Hospitality District, FL 33103',
+        taxId: 'TAX-CLIENT-005',
+        notes: 'Weekly food supply orders',
+        isActive: true,
+        createdAt: new Date('2024-02-05'),
+        updatedAt: new Date('2024-02-05')
+      },
+      {
+        id: 'client-6',
+        companyId: 'company-3',
+        name: 'Mega Corporation',
+        email: 'procurement@megacorp.com',
+        phone: '+1 (555) 300-0001',
+        address: '600 Corporate Tower, Big Business City, WA 98102',
+        taxId: 'TAX-CLIENT-006',
+        notes: 'Enterprise client - volume discounts',
+        isActive: true,
+        createdAt: new Date('2024-01-30'),
+        updatedAt: new Date('2024-01-30')
+      }
+    ];
+
+    this.saveToStorage(this.STORAGE_KEYS.clients, clients);
   }
 }

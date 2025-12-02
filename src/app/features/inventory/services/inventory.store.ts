@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { StoreBase } from '../../../core/services/store-base.service';
 import { MockApiService } from '../../../core/services/mock-api.service';
+import { PermissionService } from '../../../core/services/permission.service';
+import { CompanyContextService } from '../../../core/services/company-context.service';
 import { InventoryItem, InventoryMovement } from '../../../shared/models/inventory.model';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 interface InventoryState {
@@ -18,6 +20,8 @@ interface InventoryState {
 })
 export class InventoryStore extends StoreBase<InventoryState> {
   private readonly mockApi = inject(MockApiService);
+  private readonly permissions = inject(PermissionService);
+  private readonly companyContext = inject(CompanyContextService);
 
   readonly items$ = this.select(state => state.items);
   readonly movements$ = this.select(state => state.movements);
@@ -33,11 +37,36 @@ export class InventoryStore extends StoreBase<InventoryState> {
       error: null,
       selectedItem: null
     });
+
+    // Auto-reload inventory when company changes
+    this.setupCompanyChangeReload();
+  }
+
+  /**
+   * Gets the company ID for filtering inventory based on user role.
+   */
+  private getCompanyIdForFiltering(): string | undefined {
+    return this.permissions.isAdmin()
+      ? undefined // Admins see all companies
+      : this.companyContext.currentCompanyId ?? undefined;
+  }
+
+  /**
+   * Sets up automatic reload when company context changes.
+   */
+  private setupCompanyChangeReload(): void {
+    this.companyContext.currentCompany$.pipe(
+      distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
+      skip(1) // Skip initial value to avoid double-loading
+    ).subscribe(() => {
+      this.loadInventory();
+    });
   }
 
   loadInventory(): void {
+    const companyId = this.getCompanyIdForFiltering();
     this.patchState({ loading: true, error: null });
-    this.mockApi.getInventory().pipe(
+    this.mockApi.getInventory(companyId).pipe(
       tap(items => this.patchState({ items, loading: false, error: null })),
       catchError(err => {
         this.patchState({ error: err.message || 'Failed to load inventory', loading: false });

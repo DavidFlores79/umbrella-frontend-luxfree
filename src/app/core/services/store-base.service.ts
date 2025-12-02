@@ -1,8 +1,11 @@
-import { BehaviorSubject, Observable, distinctUntilChanged, map } from 'rxjs';
+import { inject } from '@angular/core';
+import { BehaviorSubject, Observable, Subscription, distinctUntilChanged, map } from 'rxjs';
 
 /**
  * Base class for RxJS-based state management stores.
  * All feature stores should extend this class.
+ *
+ * Includes multi-tenancy support with company-aware filtering.
  *
  * @template T - The state interface type
  *
@@ -21,11 +24,14 @@ import { BehaviorSubject, Observable, distinctUntilChanged, map } from 'rxjs';
  *
  *   constructor() {
  *     super({ items: [], loading: false, error: null });
+ *     // Optionally enable auto-reload on company change
+ *     this.reloadOnCompanyChange(() => this.loadItems());
  *   }
  *
  *   loadItems(): void {
+ *     const companyId = this.getCompanyIdForFiltering();
  *     this.patchState({ loading: true });
- *     // API call logic here
+ *     // API call with companyId filtering
  *   }
  * }
  * ```
@@ -130,4 +136,44 @@ export abstract class StoreBase<T extends object> {
   protected reset(initialState: T): void {
     this.state$.next(initialState);
   }
+
+  // ==================== MULTI-TENANCY SUPPORT ====================
+
+  /**
+   * Multi-tenancy pattern for stores:
+   *
+   * Stores should inject PermissionService and CompanyContextService, then implement:
+   *
+   * 1. Company-aware filtering:
+   * ```typescript
+   * private readonly permissions = inject(PermissionService);
+   * private readonly companyContext = inject(CompanyContextService);
+   *
+   * private getCompanyIdForFiltering(): string | undefined {
+   *   return this.permissions.isAdmin()
+   *     ? undefined  // Admins see all companies
+   *     : this.companyContext.currentCompanyId ?? undefined;
+   * }
+   *
+   * loadItems(): void {
+   *   const companyId = this.getCompanyIdForFiltering();
+   *   this.mockApi.getItems(companyId).pipe(...).subscribe();
+   * }
+   * ```
+   *
+   * 2. Auto-reload on company change:
+   * ```typescript
+   * constructor() {
+   *   super({ items: [], loading: false, error: null });
+   *   this.setupCompanyChangeReload();
+   * }
+   *
+   * private setupCompanyChangeReload(): void {
+   *   this.companyContext.currentCompany$.pipe(
+   *     distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
+   *     skip(1)  // Skip initial value
+   *   ).subscribe(() => this.loadItems());
+   * }
+   * ```
+   */
 }

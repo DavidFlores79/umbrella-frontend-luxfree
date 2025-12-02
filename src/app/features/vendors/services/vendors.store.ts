@@ -3,45 +3,46 @@ import { StoreBase } from '../../../core/services/store-base.service';
 import { MockApiService } from '../../../core/services/mock-api.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { CompanyContextService } from '../../../core/services/company-context.service';
-import { User } from '../../../shared/models/user.model';
+import { Vendor } from '../../../shared/models/vendor.model';
 import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-interface UsersState {
-  users: User[];
+interface VendorsState {
+  vendors: Vendor[];
   loading: boolean;
   error: string | null;
-  selectedUser: User | null;
+  selectedVendor: Vendor | null;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class UsersStore extends StoreBase<UsersState> {
+export class VendorsStore extends StoreBase<VendorsState> {
   private readonly mockApi = inject(MockApiService);
   private readonly permissions = inject(PermissionService);
   private readonly companyContext = inject(CompanyContextService);
 
   // Selectors
-  readonly users$ = this.select(state => state.users);
+  readonly vendors$ = this.select(state => state.vendors);
   readonly loading$ = this.select(state => state.loading);
   readonly error$ = this.select(state => state.error);
-  readonly selectedUser$ = this.select(state => state.selectedUser);
+  readonly selectedVendor$ = this.select(state => state.selectedVendor);
 
   constructor() {
     super({
-      users: [],
+      vendors: [],
       loading: false,
       error: null,
-      selectedUser: null
+      selectedVendor: null
     });
 
-    // Auto-reload users when company changes
+    // Auto-reload vendors when company changes
     this.setupCompanyChangeReload();
   }
 
   /**
-   * Gets the company ID for filtering users based on user role.
+   * Gets the company ID for filtering vendors based on user role.
+   * Admins see all companies, other users see only their company.
    */
   private getCompanyIdForFiltering(): string | undefined {
     return this.permissions.isAdmin()
@@ -57,25 +58,25 @@ export class UsersStore extends StoreBase<UsersState> {
       distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
       skip(1) // Skip initial value to avoid double-loading
     ).subscribe(() => {
-      this.loadUsers();
+      this.loadVendors();
     });
   }
 
-  loadUsers(): void {
+  loadVendors(): void {
     const companyId = this.getCompanyIdForFiltering();
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.getUsers(companyId).pipe(
-      tap(users => {
+    this.mockApi.getVendors(companyId).pipe(
+      tap(vendors => {
         this.patchState({
-          users,
+          vendors,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to load users',
+          error: err.message || 'Failed to load vendors',
           loading: false
         });
         return of([]);
@@ -83,21 +84,21 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  createUser(user: Partial<User>): void {
+  createVendor(vendor: Partial<Vendor>): void {
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.createUser(user as any).pipe(
-      tap(newUser => {
-        const users = [...this.currentState.users, newUser];
+    this.mockApi.createVendor(vendor as any).pipe(
+      tap(newVendor => {
+        const vendors = [...this.currentState.vendors, newVendor];
         this.patchState({
-          users,
+          vendors,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to create user',
+          error: err.message || 'Failed to create vendor',
           loading: false
         });
         throw err;
@@ -105,24 +106,24 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  updateUser(id: string, updates: Partial<User>): void {
+  updateVendor(id: string, updates: Partial<Vendor>): void {
     this.patchState({ loading: true, error: null });
 
     const updateDto = { id, ...updates };
-    this.mockApi.updateUser(updateDto as any).pipe(
-      tap(updatedUser => {
-        const users = this.currentState.users.map((u: User) =>
-          u.id === id ? updatedUser : u
+    this.mockApi.updateVendor(updateDto as any).pipe(
+      tap(updatedVendor => {
+        const vendors = this.currentState.vendors.map((v: Vendor) =>
+          v.id === id ? updatedVendor : v
         );
         this.patchState({
-          users,
+          vendors,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to update user',
+          error: err.message || 'Failed to update vendor',
           loading: false
         });
         throw err;
@@ -130,21 +131,21 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  deleteUser(id: string): void {
+  deleteVendor(id: string): void {
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.deleteUser(id).pipe(
+    this.mockApi.deleteVendor(id).pipe(
       tap(() => {
-        const users = this.currentState.users.filter((u: User) => u.id !== id);
+        const vendors = this.currentState.vendors.filter((v: Vendor) => v.id !== id);
         this.patchState({
-          users,
+          vendors,
           loading: false,
           error: null
         });
       }),
       catchError(err => {
         this.patchState({
-          error: err.message || 'Failed to delete user',
+          error: err.message || 'Failed to delete vendor',
           loading: false
         });
         throw err;
@@ -152,9 +153,9 @@ export class UsersStore extends StoreBase<UsersState> {
     ).subscribe();
   }
 
-  selectUser(id: string): void {
-    const user = this.currentState.users.find((u: User) => u.id === id);
-    this.patchState({ selectedUser: user || null });
+  selectVendor(id: string): void {
+    const vendor = this.currentState.vendors.find((v: Vendor) => v.id === id);
+    this.patchState({ selectedVendor: vendor || null });
   }
 
   clearError(): void {

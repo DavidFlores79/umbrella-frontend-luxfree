@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { StoreBase } from '../../../core/services/store-base.service';
 import { MockApiService } from '../../../core/services/mock-api.service';
+import { PermissionService } from '../../../core/services/permission.service';
+import { CompanyContextService } from '../../../core/services/company-context.service';
 import { Purchase } from '../../../shared/models/purchase.model';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 interface PurchasesState {
@@ -17,6 +19,8 @@ interface PurchasesState {
 })
 export class PurchasesStore extends StoreBase<PurchasesState> {
   private readonly mockApi = inject(MockApiService);
+  private readonly permissions = inject(PermissionService);
+  private readonly companyContext = inject(CompanyContextService);
 
   // Selectors
   readonly purchases$ = this.select(state => state.purchases);
@@ -31,12 +35,37 @@ export class PurchasesStore extends StoreBase<PurchasesState> {
       error: null,
       selectedPurchase: null
     });
+
+    // Auto-reload purchases when company changes
+    this.setupCompanyChangeReload();
+  }
+
+  /**
+   * Gets the company ID for filtering purchases based on user role.
+   */
+  private getCompanyIdForFiltering(): string | undefined {
+    return this.permissions.isAdmin()
+      ? undefined // Admins see all companies
+      : this.companyContext.currentCompanyId ?? undefined;
+  }
+
+  /**
+   * Sets up automatic reload when company context changes.
+   */
+  private setupCompanyChangeReload(): void {
+    this.companyContext.currentCompany$.pipe(
+      distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
+      skip(1) // Skip initial value to avoid double-loading
+    ).subscribe(() => {
+      this.loadPurchases();
+    });
   }
 
   loadPurchases(): void {
+    const companyId = this.getCompanyIdForFiltering();
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.getPurchases().pipe(
+    this.mockApi.getPurchases(companyId).pipe(
       tap(purchases => {
         this.patchState({
           purchases,

@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { StoreBase } from '../../../core/services/store-base.service';
 import { MockApiService } from '../../../core/services/mock-api.service';
+import { PermissionService } from '../../../core/services/permission.service';
+import { CompanyContextService } from '../../../core/services/company-context.service';
 import { Sale } from '../../../shared/models/sale.model';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 interface SalesState {
@@ -17,6 +19,8 @@ interface SalesState {
 })
 export class SalesStore extends StoreBase<SalesState> {
   private readonly mockApi = inject(MockApiService);
+  private readonly permissions = inject(PermissionService);
+  private readonly companyContext = inject(CompanyContextService);
 
   // Selectors
   readonly sales$ = this.select(state => state.sales);
@@ -31,12 +35,37 @@ export class SalesStore extends StoreBase<SalesState> {
       error: null,
       selectedSale: null
     });
+
+    // Auto-reload sales when company changes
+    this.setupCompanyChangeReload();
+  }
+
+  /**
+   * Gets the company ID for filtering sales based on user role.
+   */
+  private getCompanyIdForFiltering(): string | undefined {
+    return this.permissions.isAdmin()
+      ? undefined // Admins see all companies
+      : this.companyContext.currentCompanyId ?? undefined;
+  }
+
+  /**
+   * Sets up automatic reload when company context changes.
+   */
+  private setupCompanyChangeReload(): void {
+    this.companyContext.currentCompany$.pipe(
+      distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
+      skip(1) // Skip initial value to avoid double-loading
+    ).subscribe(() => {
+      this.loadSales();
+    });
   }
 
   loadSales(): void {
+    const companyId = this.getCompanyIdForFiltering();
     this.patchState({ loading: true, error: null });
 
-    this.mockApi.getSales().pipe(
+    this.mockApi.getSales(companyId).pipe(
       tap(sales => {
         this.patchState({
           sales,
