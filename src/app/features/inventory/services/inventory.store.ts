@@ -4,8 +4,8 @@ import { MockApiService } from '../../../core/services/mock-api.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { CompanyContextService } from '../../../core/services/company-context.service';
 import { InventoryItem, InventoryMovement } from '../../../shared/models/inventory.model';
-import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { tap, catchError, distinctUntilChanged, skip, filter, take, map } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 
 interface InventoryState {
   items: InventoryItem[];
@@ -63,16 +63,31 @@ export class InventoryStore extends StoreBase<InventoryState> {
     });
   }
 
+  /**
+   * Ensures currentCompany is initialized before loading data.
+   * This prevents the race condition where loadInventory() is called
+   * before currentCompanyId is set, which would cause ALL companies' data to load.
+   */
+  private ensureInitialized(): Observable<void> {
+    return this.companyContext.currentCompany$.pipe(
+      filter(company => company !== null),
+      take(1),
+      map(() => undefined)
+    );
+  }
+
   loadInventory(): void {
-    const companyId = this.getCompanyIdForFiltering();
-    this.patchState({ loading: true, error: null });
-    this.mockApi.getInventory(companyId).pipe(
-      tap(items => this.patchState({ items, loading: false, error: null })),
-      catchError(err => {
-        this.patchState({ error: err.message || 'Failed to load inventory', loading: false });
-        return of([]);
-      })
-    ).subscribe();
+    this.ensureInitialized().subscribe(() => {
+      const companyId = this.getCompanyIdForFiltering();
+      this.patchState({ loading: true, error: null });
+      this.mockApi.getInventory(companyId).pipe(
+        tap(items => this.patchState({ items, loading: false, error: null })),
+        catchError(err => {
+          this.patchState({ error: err.message || 'Failed to load inventory', loading: false });
+          return of([]);
+        })
+      ).subscribe();
+    });
   }
 
   loadMovements(inventoryItemId: string): void {

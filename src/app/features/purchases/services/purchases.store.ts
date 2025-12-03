@@ -4,8 +4,8 @@ import { MockApiService } from '../../../core/services/mock-api.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { CompanyContextService } from '../../../core/services/company-context.service';
 import { Purchase } from '../../../shared/models/purchase.model';
-import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { tap, catchError, distinctUntilChanged, skip, filter, take, map } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 
 interface PurchasesState {
   purchases: Purchase[];
@@ -61,26 +61,41 @@ export class PurchasesStore extends StoreBase<PurchasesState> {
     });
   }
 
-  loadPurchases(): void {
-    const companyId = this.getCompanyIdForFiltering();
-    this.patchState({ loading: true, error: null });
+  /**
+   * Ensures currentCompany is initialized before loading data.
+   * This prevents the race condition where loadPurchases() is called
+   * before currentCompanyId is set, which would cause ALL companies' data to load.
+   */
+  private ensureInitialized(): Observable<void> {
+    return this.companyContext.currentCompany$.pipe(
+      filter(company => company !== null),
+      take(1),
+      map(() => undefined)
+    );
+  }
 
-    this.mockApi.getPurchases(companyId).pipe(
-      tap(purchases => {
-        this.patchState({
-          purchases,
-          loading: false,
-          error: null
-        });
-      }),
-      catchError(err => {
-        this.patchState({
-          error: err.message || 'Failed to load purchases',
-          loading: false
-        });
-        return of([]);
-      })
-    ).subscribe();
+  loadPurchases(): void {
+    this.ensureInitialized().subscribe(() => {
+      const companyId = this.getCompanyIdForFiltering();
+      this.patchState({ loading: true, error: null });
+
+      this.mockApi.getPurchases(companyId).pipe(
+        tap(purchases => {
+          this.patchState({
+            purchases,
+            loading: false,
+            error: null
+          });
+        }),
+        catchError(err => {
+          this.patchState({
+            error: err.message || 'Failed to load purchases',
+            loading: false
+          });
+          return of([]);
+        })
+      ).subscribe();
+    });
   }
 
   createPurchase(purchase: Partial<Purchase>): void {

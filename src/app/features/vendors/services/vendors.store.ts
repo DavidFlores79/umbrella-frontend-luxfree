@@ -4,8 +4,8 @@ import { MockApiService } from '../../../core/services/mock-api.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { CompanyContextService } from '../../../core/services/company-context.service';
 import { Vendor } from '../../../shared/models/vendor.model';
-import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { tap, catchError, distinctUntilChanged, skip, filter, take, map } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 
 interface VendorsState {
   vendors: Vendor[];
@@ -62,26 +62,41 @@ export class VendorsStore extends StoreBase<VendorsState> {
     });
   }
 
-  loadVendors(): void {
-    const companyId = this.getCompanyIdForFiltering();
-    this.patchState({ loading: true, error: null });
+  /**
+   * Ensures currentCompany is initialized before loading data.
+   * This prevents the race condition where loadVendors() is called
+   * before currentCompanyId is set, which would cause ALL companies' data to load.
+   */
+  private ensureInitialized(): Observable<void> {
+    return this.companyContext.currentCompany$.pipe(
+      filter(company => company !== null),
+      take(1),
+      map(() => undefined)
+    );
+  }
 
-    this.mockApi.getVendors(companyId).pipe(
-      tap(vendors => {
-        this.patchState({
-          vendors,
-          loading: false,
-          error: null
-        });
-      }),
-      catchError(err => {
-        this.patchState({
-          error: err.message || 'Failed to load vendors',
-          loading: false
-        });
-        return of([]);
-      })
-    ).subscribe();
+  loadVendors(): void {
+    this.ensureInitialized().subscribe(() => {
+      const companyId = this.getCompanyIdForFiltering();
+      this.patchState({ loading: true, error: null });
+
+      this.mockApi.getVendors(companyId).pipe(
+        tap(vendors => {
+          this.patchState({
+            vendors,
+            loading: false,
+            error: null
+          });
+        }),
+        catchError(err => {
+          this.patchState({
+            error: err.message || 'Failed to load vendors',
+            loading: false
+          });
+          return of([]);
+        })
+      ).subscribe();
+    });
   }
 
   createVendor(vendor: Partial<Vendor>): void {

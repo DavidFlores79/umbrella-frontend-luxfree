@@ -4,8 +4,8 @@ import { MockApiService } from '../../../core/services/mock-api.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { CompanyContextService } from '../../../core/services/company-context.service';
 import { Client } from '../../../shared/models/client.model';
-import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { tap, catchError, distinctUntilChanged, skip, filter, take, map } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 
 interface ClientsState {
   clients: Client[];
@@ -62,26 +62,41 @@ export class ClientsStore extends StoreBase<ClientsState> {
     });
   }
 
-  loadClients(): void {
-    const companyId = this.getCompanyIdForFiltering();
-    this.patchState({ loading: true, error: null });
+  /**
+   * Ensures currentCompany is initialized before loading data.
+   * This prevents the race condition where loadClients() is called
+   * before currentCompanyId is set, which would cause ALL companies' data to load.
+   */
+  private ensureInitialized(): Observable<void> {
+    return this.companyContext.currentCompany$.pipe(
+      filter(company => company !== null),
+      take(1),
+      map(() => undefined)
+    );
+  }
 
-    this.mockApi.getClients(companyId).pipe(
-      tap(clients => {
-        this.patchState({
-          clients,
-          loading: false,
-          error: null
-        });
-      }),
-      catchError(err => {
-        this.patchState({
-          error: err.message || 'Failed to load clients',
-          loading: false
-        });
-        return of([]);
-      })
-    ).subscribe();
+  loadClients(): void {
+    this.ensureInitialized().subscribe(() => {
+      const companyId = this.getCompanyIdForFiltering();
+      this.patchState({ loading: true, error: null });
+
+      this.mockApi.getClients(companyId).pipe(
+        tap(clients => {
+          this.patchState({
+            clients,
+            loading: false,
+            error: null
+          });
+        }),
+        catchError(err => {
+          this.patchState({
+            error: err.message || 'Failed to load clients',
+            loading: false
+          });
+          return of([]);
+        })
+      ).subscribe();
+    });
   }
 
   createClient(client: Partial<Client>): void {
