@@ -5,13 +5,15 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { SalesStore } from '../services/sales.store';
 import { ProductsStore } from '../../products/services/products.store';
 import { CompaniesStore } from '../../companies/services/companies.store';
+import { ClientsStore } from '../../clients/services/clients.store';
 import { AuthService } from '../../../core/services/auth.service';
 import { Card } from '../../../shared/components/ui/card/card';
 import { Button } from '../../../shared/components/ui/button/button';
 import { FormInput } from '../../../shared/components/ui/forms/form-input/form-input';
 import { FormSelect } from '../../../shared/components/ui/forms/form-select/form-select';
 import { Alert } from '../../../shared/components/ui/alert/alert';
-import { map } from 'rxjs/operators';
+import { map, startWith, combineLatestWith } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-sale-create',
@@ -26,16 +28,41 @@ export class SaleCreateComponent implements OnInit {
   private readonly store = inject(SalesStore);
   private readonly productsStore = inject(ProductsStore);
   private readonly companiesStore = inject(CompaniesStore);
+  private readonly clientsStore = inject(ClientsStore);
   private readonly authService = inject(AuthService);
+
+  // Track selected company for cascading filtering
+  private readonly selectedCompanyId$ = new BehaviorSubject<string | null>(null);
 
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
+
+  // Cascade: Filter products by selected company
   readonly productOptions$ = this.productsStore.products$.pipe(
-    map(products => products.filter(p => p.isActive).map(p => ({
-      value: p.id,
-      label: `${p.name} (${p.sku}) - ${p.price}`
-    })))
+    combineLatestWith(this.selectedCompanyId$),
+    map(([products, companyId]) =>
+      products
+        .filter(p => p.isActive && (!companyId || p.companyId === companyId))
+        .map(p => ({
+          value: p.id,
+          label: `${p.name} (${p.sku}) - ${p.price}`
+        }))
+    )
   );
+
+  // Cascade: Filter clients by selected company
+  readonly clientOptions$ = this.clientsStore.clients$.pipe(
+    combineLatestWith(this.selectedCompanyId$),
+    map(([clients, companyId]) =>
+      clients
+        .filter(c => c.isActive && (!companyId || c.companyId === companyId))
+        .map(c => ({
+          value: c.id,
+          label: `${c.name} - ${c.email}`
+        }))
+    )
+  );
+
   readonly companyOptions$ = this.companiesStore.companies$.pipe(
     map(companies => companies.map(c => ({ value: c.id, label: c.name })))
   );
@@ -55,7 +82,17 @@ export class SaleCreateComponent implements OnInit {
   ngOnInit(): void {
     this.productsStore.loadProducts();
     this.companiesStore.loadCompanies();
+    this.clientsStore.loadClients();
     this.initializeForm();
+
+    // Listen to company selection changes for cascading filtering
+    this.form.get('companyId')?.valueChanges.subscribe(companyId => {
+      this.selectedCompanyId$.next(companyId);
+      // Clear product selections when company changes to avoid invalid selections
+      this.items.controls.forEach(item => {
+        item.get('productId')?.setValue('');
+      });
+    });
 
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -117,6 +154,9 @@ export class SaleCreateComponent implements OnInit {
     this.store.sales$.subscribe(sales => {
       const sale = sales.find(s => s.id === id);
       if (sale) {
+        // Set selected company first for cascading filtering
+        this.selectedCompanyId$.next(sale.companyId);
+
         this.form.patchValue({
           companyId: sale.companyId,
           customerName: sale.customerName,
