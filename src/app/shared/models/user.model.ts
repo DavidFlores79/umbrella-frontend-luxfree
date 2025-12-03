@@ -154,5 +154,6 @@ export interface UpdateUserDto {
   lastName?: string;
   phone?: string;
   role?: UserRole;
+  companyId?: string;
   isActive?: boolean;
 }

@@ -111,4 +111,17 @@ export class SaleListComponent implements OnInit {
         return 'info';
     }
   }
+
+  // Permission checks for UI
+  canCreate(): boolean {
+    return this.permissions.hasPermission('sales:write');
+  }
+
+  canEdit(): boolean {
+    return this.permissions.hasPermission('sales:write');
+  }
+
+  canDelete(): boolean {
+    return this.permissions.hasPermission('sales:delete');
+  }
 }

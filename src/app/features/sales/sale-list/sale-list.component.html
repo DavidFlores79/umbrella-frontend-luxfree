@@ -5,10 +5,12 @@
       <h1 class="text-2xl font-bold text-text">Sales</h1>
       <p class="mt-1 text-sm text-text-light">Manage sales invoices and transactions</p>
     </div>
-    <app-button variant="primary" (click)="onCreate()">
-      <span class="mr-2">+</span>
-      Create Sale
-    </app-button>
+    @if (canCreate()) {
+      <app-button variant="primary" (click)="onCreate()">
+        <span class="mr-2">+</span>
+        Create Sale
+      </app-button>
+    }
   </div>
 
   <!-- Error Alert -->
@@ -68,8 +70,15 @@
                   <div class="text-sm text-text-light">{{ sale.createdAt | appDateFormat }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button (click)="onEdit(sale)" class="text-primary hover:text-primary-700 mr-4">Edit</button>
-                  <button (click)="onDelete(sale)" class="text-accent-red hover:text-red-700">Delete</button>
+                  @if (canEdit()) {
+                    <button (click)="onEdit(sale)" class="text-primary hover:text-primary-700 mr-4">Edit</button>
+                  }
+                  @if (canDelete()) {
+                    <button (click)="onDelete(sale)" class="text-accent-red hover:text-red-700">Delete</button>
+                  }
+                  @if (!canEdit() && !canDelete()) {
+                    <span class="text-text-light text-xs">View only</span>
+                  }
                 </td>
               </tr>
             </tbody>
@@ -96,17 +105,32 @@
                 <span class="text-text">{{ sale.createdAt | appDateFormat }}</span>
               </div>
             </div>
-            <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <button (click)="onEdit(sale)" class="flex-1 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-50 dark:hover:bg-gray-800 rounded-md">Edit</button>
-              <button (click)="onDelete(sale)" class="flex-1 px-4 py-2 text-sm font-medium text-accent-red hover:bg-red-50 dark:hover:bg-gray-800 rounded-md">Delete</button>
-            </div>
+            @if (canEdit() || canDelete()) {
+              <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                @if (canEdit()) {
+                  <button (click)="onEdit(sale)" class="flex-1 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-50 dark:hover:bg-gray-800 rounded-md">Edit</button>
+                }
+                @if (canDelete()) {
+                  <button (click)="onDelete(sale)" class="flex-1 px-4 py-2 text-sm font-medium text-accent-red hover:bg-red-50 dark:hover:bg-gray-800 rounded-md">Delete</button>
+                }
+              </div>
+            } @else {
+              <div class="pt-3 border-t border-gray-200 dark:border-gray-700 text-center">
+                <span class="text-text-light text-xs">View only access</span>
+              </div>
+            }
           </div>
         </div>
       </div>
     </div>
 
     <ng-template #empty>
-      <app-empty-state title="No sales found" description="Get started by creating your first sale" [actionLabel]="'Create Sale'" (action)="onCreate()"></app-empty-state>
+      <app-empty-state
+        title="No sales found"
+        [description]="canCreate() ? 'Get started by creating your first sale' : 'No sales available to display'"
+        [actionLabel]="canCreate() ? 'Create Sale' : ''"
+        (action)="onCreate()"
+      ></app-empty-state>
     </ng-template>
 
     <ng-template #loading>

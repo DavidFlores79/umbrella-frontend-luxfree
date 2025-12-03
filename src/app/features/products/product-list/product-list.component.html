@@ -5,10 +5,12 @@
       <h1 class="text-2xl font-bold text-text">Products & Services</h1>
       <p class="mt-1 text-sm text-text-light">Manage your product catalog and services</p>
     </div>
-    <app-button variant="primary" (click)="onCreate()">
-      <span class="mr-2">+</span>
-      Create Product
-    </app-button>
+    @if (canCreate()) {
+      <app-button variant="primary" (click)="onCreate()">
+        <span class="mr-2">+</span>
+        Create Product
+      </app-button>
+    }
   </div>
 
   <!-- Error Alert -->
@@ -90,18 +92,25 @@
                   </app-badge>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    (click)="onEdit(product)"
-                    class="text-primary hover:text-primary-700 mr-4"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    (click)="onDelete(product)"
-                    class="text-accent-red hover:text-red-700"
-                  >
-                    Delete
-                  </button>
+                  @if (canEdit()) {
+                    <button
+                      (click)="onEdit(product)"
+                      class="text-primary hover:text-primary-700 mr-4"
+                    >
+                      Edit
+                    </button>
+                  }
+                  @if (canDelete()) {
+                    <button
+                      (click)="onDelete(product)"
+                      class="text-accent-red hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  }
+                  @if (!canEdit() && !canDelete()) {
+                    <span class="text-text-light text-xs">View only</span>
+                  }
                 </td>
               </tr>
             </tbody>
@@ -145,20 +154,30 @@
               </div>
             </div>
 
-            <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <button
-                (click)="onEdit(product)"
-                class="flex-1 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-50 dark:hover:bg-gray-800 rounded-md"
-              >
-                Edit
-              </button>
-              <button
-                (click)="onDelete(product)"
-                class="flex-1 px-4 py-2 text-sm font-medium text-accent-red hover:bg-red-50 dark:hover:bg-gray-800 rounded-md"
-              >
-                Delete
-              </button>
-            </div>
+            @if (canEdit() || canDelete()) {
+              <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                @if (canEdit()) {
+                  <button
+                    (click)="onEdit(product)"
+                    class="flex-1 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-50 dark:hover:bg-gray-800 rounded-md"
+                  >
+                    Edit
+                  </button>
+                }
+                @if (canDelete()) {
+                  <button
+                    (click)="onDelete(product)"
+                    class="flex-1 px-4 py-2 text-sm font-medium text-accent-red hover:bg-red-50 dark:hover:bg-gray-800 rounded-md"
+                  >
+                    Delete
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="pt-3 border-t border-gray-200 dark:border-gray-700 text-center">
+                <span class="text-text-light text-xs">View only access</span>
+              </div>
+            }
           </div>
         </div>
       </div>
@@ -167,8 +186,8 @@
     <ng-template #empty>
       <app-empty-state
         title="No products found"
-        description="Get started by creating your first product"
-        [actionLabel]="'Create Product'"
+        [description]="canCreate() ? 'Get started by creating your first product' : 'No products available to display'"
+        [actionLabel]="canCreate() ? 'Create Product' : ''"
         (action)="onCreate()"
       ></app-empty-state>
     </ng-template>

@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ClientsStore } from '../services/clients.store';
+import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-client-list',
@@ -11,6 +12,7 @@ import { ClientsStore } from '../services/clients.store';
 })
 export class ClientListComponent implements OnInit {
   private readonly clientsStore = inject(ClientsStore);
+  private readonly permissions = inject(PermissionService);
 
   readonly clients$ = this.clientsStore.clients$;
   readonly loading$ = this.clientsStore.loading$;
@@ -28,5 +30,18 @@ export class ClientListComponent implements OnInit {
 
   toggleActive(id: string, isActive: boolean): void {
     this.clientsStore.updateClient(id, { isActive: !isActive });
+  }
+
+  // Permission checks for UI
+  canCreate(): boolean {
+    return this.permissions.hasPermission('sales:write'); // Clients are part of sales module
+  }
+
+  canEdit(): boolean {
+    return this.permissions.hasPermission('sales:write');
+  }
+
+  canDelete(): boolean {
+    return this.permissions.hasPermission('sales:delete');
   }
 }

@@ -1,15 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UsersStore } from '../services/users.store';
 import { CompaniesStore } from '../../companies/services/companies.store';
+import { MockApiService } from '../../../core/services/mock-api.service';
 import { Card } from '../../../shared/components/ui/card/card';
 import { Button } from '../../../shared/components/ui/button/button';
 import { FormInput } from '../../../shared/components/ui/forms/form-input/form-input';
 import { FormSelect } from '../../../shared/components/ui/forms/form-select/form-select';
 import { Alert } from '../../../shared/components/ui/alert/alert';
-import { map } from 'rxjs/operators';
+import { map, filter, take } from 'rxjs/operators';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-user-create',
@@ -25,12 +27,14 @@ import { map } from 'rxjs/operators';
   ],
   templateUrl: './user-create.component.html'
 })
-export class UserCreateComponent implements OnInit {
+export class UserCreateComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly store = inject(UsersStore);
   private readonly companiesStore = inject(CompaniesStore);
+  private readonly mockApi = inject(MockApiService);
+  private readonly destroy$ = new Subject<void>();
 
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
@@ -43,6 +47,7 @@ export class UserCreateComponent implements OnInit {
   userId: string | null = null;
   form!: FormGroup;
   submitted = false;
+  loadError: string | null = null;
 
   readonly roleOptions = [
     { value: 'user', label: 'User' },
@@ -56,16 +61,31 @@ export class UserCreateComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    // Load companies first
     this.companiesStore.loadCompanies();
-    this.initializeForm();
 
-    this.route.params.subscribe(params => {
+    // Check if we're in edit mode
+    this.route.params.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
       if (params['id']) {
         this.isEditMode = true;
         this.userId = params['id'];
-        this.loadUser(params['id']);
+      }
+
+      // Initialize form after we know the mode
+      this.initializeForm();
+
+      // Load user data if in edit mode
+      if (this.isEditMode && this.userId) {
+        this.loadUser(this.userId);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private initializeForm(): void {
@@ -82,9 +102,15 @@ export class UserCreateComponent implements OnInit {
   }
 
   private loadUser(id: string): void {
-    this.store.users$.subscribe(users => {
-      const user = users.find(u => u.id === id);
-      if (user) {
+    console.log('🔍 Loading user with ID:', id);
+
+    // Use the API directly to get the user by ID (bypasses company filtering)
+    this.mockApi.getUser(id).pipe(
+      take(1),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (user) => {
+        console.log('📝 User data loaded successfully:', user);
         this.form.patchValue({
           firstName: user.firstName,
           lastName: user.lastName,
@@ -94,6 +120,11 @@ export class UserCreateComponent implements OnInit {
           phone: user.phone || '',
           isActive: user.isActive.toString()
         });
+        console.log('✅ Form patched with values:', this.form.value);
+      },
+      error: (err) => {
+        console.error('❌ Error loading user:', err);
+        this.loadError = 'Failed to load user data';
       }
     });
   }
@@ -107,6 +138,7 @@ export class UserCreateComponent implements OnInit {
     });
 
     if (this.form.invalid) {
+      console.log('❌ Form is invalid:', this.form.errors);
       return;
     }
 
@@ -125,17 +157,31 @@ export class UserCreateComponent implements OnInit {
       userData.password = formValue.password;
     }
 
+    console.log('💾 Submitting user data:', { isEditMode: this.isEditMode, userId: this.userId, userData });
+
     if (this.isEditMode && this.userId) {
       this.store.updateUser(this.userId, userData);
     } else {
       this.store.createUser(userData);
     }
 
-    // Navigate back on success
-    this.loading$.subscribe(loading => {
-      if (!loading && this.submitted) {
-        this.router.navigate(['/users']);
-      }
+    // Wait for the operation to complete, then navigate
+    this.loading$.pipe(
+      filter(loading => !loading), // Wait until loading is false
+      take(1), // Take only the first emission after loading completes
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // Check if there was no error
+      this.error$.pipe(
+        take(1)
+      ).subscribe(error => {
+        if (!error) {
+          console.log('✅ User saved successfully, navigating back');
+          this.router.navigate(['/users']);
+        } else {
+          console.error('❌ Error saving user:', error);
+        }
+      });
     });
   }
 

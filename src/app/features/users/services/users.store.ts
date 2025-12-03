@@ -4,7 +4,7 @@ import { MockApiService } from '../../../core/services/mock-api.service';
 import { PermissionService } from '../../../core/services/permission.service';
 import { CompanyContextService } from '../../../core/services/company-context.service';
 import { User } from '../../../shared/models/user.model';
-import { tap, catchError, distinctUntilChanged, skip } from 'rxjs/operators';
+import { tap, catchError, distinctUntilChanged, skip, filter, take, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 interface UsersState {
@@ -44,9 +44,16 @@ export class UsersStore extends StoreBase<UsersState> {
    * Gets the company ID for filtering users based on user role.
    */
   private getCompanyIdForFiltering(): string | undefined {
-    return this.permissions.isAdmin()
-      ? undefined // Admins see all companies
-      : this.companyContext.currentCompanyId ?? undefined;
+    const isAdmin = this.permissions.isAdmin();
+    const companyId = isAdmin ? undefined : (this.companyContext.currentCompanyId ?? undefined);
+
+    console.log('🎯 [UsersStore] getCompanyIdForFiltering:', {
+      isAdmin,
+      currentCompanyId: this.companyContext.currentCompanyId,
+      returnValue: companyId
+    });
+
+    return companyId;
   }
 
   /**
@@ -62,11 +69,35 @@ export class UsersStore extends StoreBase<UsersState> {
   }
 
   loadUsers(): void {
-    const companyId = this.getCompanyIdForFiltering();
+    console.log('🔍 [UsersStore] Loading users...');
+    console.log('  - Is Admin:', this.permissions.isAdmin());
+    console.log('  - Current Company ID from context (initial):', this.companyContext.currentCompanyId);
+
     this.patchState({ loading: true, error: null });
+
+    // Wait for company context to be ready before loading users
+    // This prevents loading all users when company context is still initializing
+    if (this.permissions.isAdmin()) {
+      // Admins can load immediately without waiting for company context
+      this.loadUsersData();
+    } else {
+      // Non-admins must wait for company context to be set
+      this.companyContext.currentCompany$.pipe(
+        filter(company => company !== null), // Wait until company is set
+        take(1) // Take the first non-null value and complete
+      ).subscribe(() => {
+        this.loadUsersData();
+      });
+    }
+  }
+
+  private loadUsersData(): void {
+    const companyId = this.getCompanyIdForFiltering();
+    console.log('  - Company ID filter (after context ready):', companyId);
 
     this.mockApi.getUsers(companyId).pipe(
       tap(users => {
+        console.log('  - Users loaded:', users.length);
         this.patchState({
           users,
           loading: false,
@@ -74,6 +105,7 @@ export class UsersStore extends StoreBase<UsersState> {
         });
       }),
       catchError(err => {
+        console.error('  - Error loading users:', err);
         this.patchState({
           error: err.message || 'Failed to load users',
           loading: false

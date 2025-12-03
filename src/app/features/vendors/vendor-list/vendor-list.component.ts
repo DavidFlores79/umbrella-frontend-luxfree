@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { VendorsStore } from '../services/vendors.store';
+import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-vendor-list',
@@ -11,6 +12,7 @@ import { VendorsStore } from '../services/vendors.store';
 })
 export class VendorListComponent implements OnInit {
   private readonly vendorsStore = inject(VendorsStore);
+  private readonly permissions = inject(PermissionService);
 
   readonly vendors$ = this.vendorsStore.vendors$;
   readonly loading$ = this.vendorsStore.loading$;
@@ -28,5 +30,18 @@ export class VendorListComponent implements OnInit {
 
   toggleActive(id: string, isActive: boolean): void {
     this.vendorsStore.updateVendor(id, { isActive: !isActive });
+  }
+
+  // Permission checks for UI
+  canCreate(): boolean {
+    return this.permissions.hasPermission('purchases:write'); // Vendors are part of purchases module
+  }
+
+  canEdit(): boolean {
+    return this.permissions.hasPermission('purchases:write');
+  }
+
+  canDelete(): boolean {
+    return this.permissions.hasPermission('purchases:delete');
   }
 }

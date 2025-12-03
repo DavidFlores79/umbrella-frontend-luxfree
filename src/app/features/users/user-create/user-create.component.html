@@ -21,6 +21,17 @@
     </app-alert>
   }
 
+  @if (loadError) {
+    <app-alert
+      type="error"
+      [dismissible]="true"
+      (dismissed)="loadError = null"
+      class="mb-6"
+    >
+      {{ loadError }}
+    </app-alert>
+  }
+
   <!-- Form -->
   <app-card>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">

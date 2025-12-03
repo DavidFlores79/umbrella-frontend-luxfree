@@ -95,4 +95,17 @@ export class PurchaseListComponent implements OnInit {
       default: return 'info';
     }
   }
+
+  // Permission checks for UI
+  canCreate(): boolean {
+    return this.permissions.hasPermission('purchases:write');
+  }
+
+  canEdit(): boolean {
+    return this.permissions.hasPermission('purchases:write');
+  }
+
+  canDelete(): boolean {
+    return this.permissions.hasPermission('purchases:delete');
+  }
 }

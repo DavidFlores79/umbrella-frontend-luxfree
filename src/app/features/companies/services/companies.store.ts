@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { StoreBase } from '../../../core/services/store-base.service';
 import { MockApiService } from '../../../core/services/mock-api.service';
+import { PermissionService } from '../../../core/services/permission.service';
+import { CompanyContextService } from '../../../core/services/company-context.service';
 import { Company } from '../../../shared/models/company.model';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -17,6 +19,8 @@ interface CompaniesState {
 })
 export class CompaniesStore extends StoreBase<CompaniesState> {
   private readonly mockApi = inject(MockApiService);
+  private readonly permissions = inject(PermissionService);
+  private readonly companyContext = inject(CompanyContextService);
 
   // Selectors
   readonly companies$ = this.select(state => state.companies);
@@ -38,8 +42,18 @@ export class CompaniesStore extends StoreBase<CompaniesState> {
 
     this.mockApi.getCompanies().pipe(
       tap(companies => {
+        // Filter companies based on user role
+        const filteredCompanies = this.filterCompaniesByRole(companies);
+
+        console.log('🏢 [CompaniesStore] Loading companies...');
+        console.log('  - Is Admin:', this.permissions.isAdmin());
+        console.log('  - Is Manager:', this.permissions.isManager());
+        console.log('  - Current Company ID:', this.companyContext.currentCompanyId);
+        console.log('  - Total companies:', companies.length);
+        console.log('  - Filtered companies:', filteredCompanies.length);
+
         this.patchState({
-          companies,
+          companies: filteredCompanies,
           loading: false,
           error: null
         });
@@ -52,6 +66,36 @@ export class CompaniesStore extends StoreBase<CompaniesState> {
         return of([]);
       })
     ).subscribe();
+  }
+
+  /**
+   * Filters companies based on user role:
+   * - USER role: Cannot see any companies (empty array)
+   * - MANAGER role: Can only see their own company
+   * - ADMIN role: Can see all companies
+   */
+  private filterCompaniesByRole(companies: Company[]): Company[] {
+    // USER role should not see any companies
+    if (this.permissions.hasRole('user')) {
+      return [];
+    }
+
+    // ADMIN can see all companies
+    if (this.permissions.isAdmin()) {
+      return companies;
+    }
+
+    // MANAGER can only see their own company
+    if (this.permissions.isManager()) {
+      const currentCompanyId = this.companyContext.currentCompanyId;
+      if (!currentCompanyId) {
+        return [];
+      }
+      return companies.filter(c => c.id === currentCompanyId);
+    }
+
+    // Default: no access
+    return [];
   }
 
   createCompany(company: Partial<Company>): void {

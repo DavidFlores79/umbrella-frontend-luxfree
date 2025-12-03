@@ -157,32 +157,44 @@ export class CompanyContextService {
    * Initializes company context from storage or user's company.
    */
   private initializeContext(): void {
-    // Try to load from localStorage first
-    const storedCompany = localStorage.getItem(this.STORAGE_KEY);
-
-    if (storedCompany) {
-      try {
-        const company = JSON.parse(storedCompany) as Company;
-        this.patchState({ currentCompany: company });
-        return;
-      } catch {
-        // Invalid data, clear it
-        localStorage.removeItem(this.STORAGE_KEY);
-      }
-    }
-
-    // Otherwise, set from authenticated user's company
+    // Subscribe to auth changes to update company context
     this.authService.user$.subscribe(user => {
-      if (user && !this.currentCompany) {
-        this.mockApi.getCompany(user.companyId).subscribe(
-          company => {
-            this.setCurrentCompany(company);
-          },
-          error => {
-            this.patchState({ error: 'Failed to load company context' });
+      if (user) {
+        // User is logged in
+        const storedCompany = localStorage.getItem(this.STORAGE_KEY);
+        let shouldLoadFromUser = true;
+
+        // Check if stored company belongs to current user
+        if (storedCompany) {
+          try {
+            const company = JSON.parse(storedCompany) as Company;
+            // Only use stored company if it belongs to the current user
+            if (company.id === user.companyId) {
+              this.patchState({ currentCompany: company });
+              shouldLoadFromUser = false;
+            } else {
+              // Clear invalid stored company (belongs to different user)
+              localStorage.removeItem(this.STORAGE_KEY);
+            }
+          } catch {
+            // Invalid data, clear it
+            localStorage.removeItem(this.STORAGE_KEY);
           }
-        );
-      } else if (!user) {
+        }
+
+        // Load company from user's companyId if needed
+        if (shouldLoadFromUser) {
+          this.mockApi.getCompany(user.companyId).subscribe(
+            company => {
+              this.setCurrentCompany(company);
+            },
+            error => {
+              this.patchState({ error: 'Failed to load company context' });
+            }
+          );
+        }
+      } else {
+        // User logged out, clear context
         this.clearContext();
       }
     });

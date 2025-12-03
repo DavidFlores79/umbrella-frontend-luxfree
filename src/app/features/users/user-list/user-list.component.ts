@@ -43,33 +43,21 @@ export class UserListComponent implements OnInit {
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
 
-  companies$: Observable<Company[]> = of([]);
-  usersWithCompany$: Observable<(User & { companyName?: string })[]> = of([]);
+  companies$ = this.mockApi.getCompanies();
+
+  usersWithCompany$ = this.users$.pipe(
+    combineLatestWith(this.companies$),
+    map(([users, companies]) => {
+      return users.map(user => ({
+        ...user,
+        companyName: companies.find(c => c.id === user.companyId)?.name || 'Unknown'
+      }));
+    })
+  );
 
   searchTerm = '';
 
-  ngOnInit(): void {
-    // Load companies
-    this.companies$ = this.mockApi.getCompanies();
-
-    // Combine users with company names
-    this.usersWithCompany$ = this.users$.pipe(
-      combineLatestWith(this.companies$),
-      map(([users, companies]) => {
-        return users.map(user => ({
-          ...user,
-          companyName: companies.find(c => c.id === user.companyId)?.name || 'Unknown'
-        }));
-      })
-    );
-
-    console.log('🔍 Current user role:', this.permissions.isAdmin() ? 'ADMIN' : 'NON-ADMIN');
-    console.log('🏢 Current company ID:', this.companyContext.currentCompanyId);
-
-    this.store.loadUsers();
-  }
-
-  readonly filteredUsers$ = this.usersWithCompany$.pipe(
+  filteredUsers$ = this.usersWithCompany$.pipe(
     map(users => {
       if (!this.searchTerm) {
         return users;
@@ -84,6 +72,13 @@ export class UserListComponent implements OnInit {
       );
     })
   );
+
+  ngOnInit(): void {
+    console.log('🔍 Current user role:', this.permissions.isAdmin() ? 'ADMIN' : 'NON-ADMIN');
+    console.log('🏢 Current company ID:', this.companyContext.currentCompanyId);
+
+    this.store.loadUsers();
+  }
 
   readonly columns = [
     { key: 'name', label: 'Name', sortable: true },
@@ -130,5 +125,18 @@ export class UserListComponent implements OnInit {
       default:
         return 'info';
     }
+  }
+
+  // Permission checks for UI
+  canCreate(): boolean {
+    return this.permissions.hasPermission('users:write');
+  }
+
+  canEdit(): boolean {
+    return this.permissions.hasPermission('users:write');
+  }
+
+  canDelete(): boolean {
+    return this.permissions.hasPermission('users:delete');
   }
 }

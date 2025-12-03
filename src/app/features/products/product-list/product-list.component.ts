@@ -136,4 +136,17 @@ export class ProductListComponent implements OnInit {
         return 'info';
     }
   }
+
+  // Permission checks for UI
+  canCreate(): boolean {
+    return this.permissions.hasPermission('products:write');
+  }
+
+  canEdit(): boolean {
+    return this.permissions.hasPermission('products:write');
+  }
+
+  canDelete(): boolean {
+    return this.permissions.hasPermission('products:delete');
+  }
 }
