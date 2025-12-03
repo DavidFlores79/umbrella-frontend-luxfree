@@ -1,13 +1,13 @@
-FROM node:18-alpine AS build
+FROM node:20-alpine
+
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+COPY package.json yarn.lock ./
+
+RUN yarn install --frozen-lockfile
 
 COPY . .
-RUN npm run build --prod
 
-FROM nginx:alpine
-COPY --from=build /app/dist/umbrella-frontend /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+RUN yarn build
+
+CMD ["yarn", "start"]
