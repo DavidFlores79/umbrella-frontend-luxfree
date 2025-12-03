@@ -41,6 +41,14 @@ export type Permission =
   | 'products:read'
   | 'products:write'
   | 'products:delete'
+  // Client management
+  | 'clients:read'
+  | 'clients:write'
+  | 'clients:delete'
+  // Vendor management
+  | 'vendors:read'
+  | 'vendors:write'
+  | 'vendors:delete'
   // Sales management
   | 'sales:read'
   | 'sales:write'
@@ -67,6 +75,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'companies:read', 'companies:write', 'companies:delete',
     'users:read', 'users:write', 'users:delete',
     'products:read', 'products:write', 'products:delete',
+    'clients:read', 'clients:write', 'clients:delete',
+    'vendors:read', 'vendors:write', 'vendors:delete',
     'sales:read', 'sales:write', 'sales:delete',
     'purchases:read', 'purchases:write', 'purchases:delete',
     'inventory:read', 'inventory:write', 'inventory:delete',
@@ -77,6 +87,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'companies:read',
     'users:read',
     'products:read', 'products:write', 'products:delete',
+    'clients:read', 'clients:write', 'clients:delete',
+    'vendors:read', 'vendors:write', 'vendors:delete',
     'sales:read', 'sales:write', 'sales:delete',
     'purchases:read', 'purchases:write', 'purchases:delete',
     'inventory:read', 'inventory:write', 'inventory:delete',
@@ -87,6 +99,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'companies:read',
     'users:read',
     'products:read',
+    'clients:read',
+    'vendors:read',
     'sales:read',
     'purchases:read',
     'inventory:read',

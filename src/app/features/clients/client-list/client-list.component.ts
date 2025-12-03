@@ -34,14 +34,14 @@ export class ClientListComponent implements OnInit {
 
   // Permission checks for UI
   canCreate(): boolean {
-    return this.permissions.hasPermission('sales:write'); // Clients are part of sales module
+    return this.permissions.hasPermission('clients:write');
   }
 
   canEdit(): boolean {
-    return this.permissions.hasPermission('sales:write');
+    return this.permissions.hasPermission('clients:write');
   }
 
   canDelete(): boolean {
-    return this.permissions.hasPermission('sales:delete');
+    return this.permissions.hasPermission('clients:delete');
   }
 }

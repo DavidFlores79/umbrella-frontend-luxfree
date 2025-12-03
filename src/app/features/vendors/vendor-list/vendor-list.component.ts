@@ -34,14 +34,14 @@ export class VendorListComponent implements OnInit {
 
   // Permission checks for UI
   canCreate(): boolean {
-    return this.permissions.hasPermission('purchases:write'); // Vendors are part of purchases module
+    return this.permissions.hasPermission('vendors:write');
   }
 
   canEdit(): boolean {
-    return this.permissions.hasPermission('purchases:write');
+    return this.permissions.hasPermission('vendors:write');
   }
 
   canDelete(): boolean {
-    return this.permissions.hasPermission('purchases:delete');
+    return this.permissions.hasPermission('vendors:delete');
   }
 }
