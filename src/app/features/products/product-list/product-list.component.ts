@@ -12,7 +12,8 @@ import { Alert } from '../../../shared/components/ui/alert/alert';
 import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
 import { CurrencyPipe } from '../../../shared/pipes/currency.pipe';
 import { Product } from '../../../shared/models/product.model';
-import { map } from 'rxjs/operators';
+import { map, combineLatestWith } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-product-list',
@@ -39,14 +40,15 @@ export class ProductListComponent implements OnInit {
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
 
-  searchTerm = '';
+  private readonly searchTerm$ = new BehaviorSubject<string>('');
 
   readonly filteredProducts$ = this.products$.pipe(
-    map(products => {
-      if (!this.searchTerm) {
+    combineLatestWith(this.searchTerm$),
+    map(([products, searchTerm]) => {
+      if (!searchTerm) {
         return products;
       }
-      const term = this.searchTerm.toLowerCase();
+      const term = searchTerm.toLowerCase();
       return products.filter(product =>
         product.name.toLowerCase().includes(term) ||
         product.sku.toLowerCase().includes(term) ||
@@ -84,7 +86,7 @@ export class ProductListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
-    this.searchTerm = term;
+    this.searchTerm$.next(term);
   }
 
   onCreate(): void {

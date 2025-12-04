@@ -49,6 +49,7 @@ export type PurchaseStatus = 'draft' | 'ordered' | 'received' | 'paid' | 'cancel
  */
 export interface CreatePurchaseDto {
   companyId: string;
+  vendorId?: string;
   vendorName: string;
   vendorEmail: string;
   vendorPhone: string;
@@ -75,6 +76,7 @@ export interface CreatePurchaseLineItemDto {
  */
 export interface UpdatePurchaseDto {
   id: string;
+  vendorId?: string;
   vendorName?: string;
   vendorEmail?: string;
   vendorPhone?: string;

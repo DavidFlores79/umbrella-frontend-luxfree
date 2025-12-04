@@ -13,7 +13,8 @@ import { EmptyState } from '../../../shared/components/ui/empty-state/empty-stat
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { CurrencyPipe } from '../../../shared/pipes/currency.pipe';
 import { Sale } from '../../../shared/models/sale.model';
-import { map } from 'rxjs/operators';
+import { map, combineLatestWith } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-sale-list',
@@ -41,14 +42,15 @@ export class SaleListComponent implements OnInit {
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
 
-  searchTerm = '';
+  private readonly searchTerm$ = new BehaviorSubject<string>('');
 
   readonly filteredSales$ = this.sales$.pipe(
-    map(sales => {
-      if (!this.searchTerm) {
+    combineLatestWith(this.searchTerm$),
+    map(([sales, searchTerm]) => {
+      if (!searchTerm) {
         return sales;
       }
-      const term = this.searchTerm.toLowerCase();
+      const term = searchTerm.toLowerCase();
       return sales.filter(sale =>
         sale.invoiceNumber.toLowerCase().includes(term) ||
         sale.customerName.toLowerCase().includes(term) ||
@@ -76,7 +78,7 @@ export class SaleListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
-    this.searchTerm = term;
+    this.searchTerm$.next(term);
   }
 
   onCreate(): void {

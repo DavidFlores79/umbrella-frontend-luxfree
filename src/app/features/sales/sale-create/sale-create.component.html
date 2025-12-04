@@ -16,9 +16,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <app-form-select class="md:col-span-2"
               formControlName="companyId" label="Company" [options]="(companyOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('companyId')"></app-form-select>
-            <app-form-input formControlName="customerName" label="Customer Name" placeholder="Enter customer name" [required]="true" [errorMessage]="getFieldError('customerName')"></app-form-input>
-            <app-form-input formControlName="customerEmail" label="Email" type="email" placeholder="customer@example.com" [required]="true" [errorMessage]="getFieldError('customerEmail')"></app-form-input>
-            <app-form-input formControlName="customerPhone" label="Phone" type="tel" placeholder="+1 (555) 123-4567" [errorMessage]="getFieldError('customerPhone')"></app-form-input>
+            <app-form-select class="md:col-span-2"
+              formControlName="clientId" label="Customer" [options]="(clientOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('clientId')"></app-form-select>
+            <app-form-input formControlName="customerName" label="Customer Name" placeholder="Auto-populated from selected customer" [required]="true" [errorMessage]="getFieldError('customerName')"></app-form-input>
+            <app-form-input formControlName="customerEmail" label="Email" type="email" placeholder="Auto-populated from selected customer" [required]="true" [errorMessage]="getFieldError('customerEmail')"></app-form-input>
+            <app-form-input formControlName="customerPhone" label="Phone" type="tel" placeholder="Auto-populated from selected customer" [errorMessage]="getFieldError('customerPhone')"></app-form-input>
           </div>
         </div>
 

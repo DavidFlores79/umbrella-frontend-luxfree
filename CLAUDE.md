@@ -151,7 +151,127 @@ export class FeatureStore extends StoreBase<FeatureState> {
 
 **Important**: Do NOT use Angular Signals for state management. Use RxJS Observables with the `async` pipe in templates.
 
-#### 2. Dependency Injection with `inject()`
+#### 2. Efficient Single-Item Loading Pattern (CRITICAL FOR API)
+
+**ALWAYS implement `loadItemById()` methods in stores for edit forms.** This pattern is MANDATORY and must be used for all edit/detail views.
+
+**Why this matters:**
+- Prevents loading thousands of records just to edit one item
+- Essential for production performance with real APIs
+- Reduces bandwidth, server load, and client memory usage
+
+**Store Implementation Pattern:**
+```typescript
+@Injectable({ providedIn: 'root' })
+export class SalesStore extends StoreBase<SalesState> {
+  private readonly mockApi = inject(MockApiService);
+
+  // Collection loading (for list views)
+  loadSales(): void {
+    this.patchState({ loading: true, error: null });
+    this.mockApi.getSales().pipe(
+      tap(sales => this.patchState({ sales, loading: false })),
+      catchError(err => {
+        this.patchState({ error: err.message, loading: false });
+        throw err;
+      })
+    ).subscribe();
+  }
+
+  // Single item loading (for edit/detail views) - REQUIRED!
+  loadSaleById(id: string): void {
+    this.patchState({ loading: true, error: null });
+
+    this.mockApi.getSale(id).pipe(
+      tap(sale => {
+        // Update or add to existing collection
+        const sales = this.currentState.sales;
+        const existingIndex = sales.findIndex(s => s.id === id);
+
+        const updatedSales = existingIndex >= 0
+          ? sales.map(s => s.id === id ? sale : s)
+          : [...sales, sale];
+
+        this.patchState({
+          sales: updatedSales,
+          selectedSale: sale,
+          loading: false,
+          error: null
+        });
+      }),
+      catchError(err => {
+        this.patchState({
+          error: err.message || 'Failed to load sale',
+          loading: false
+        });
+        return of(null);
+      })
+    ).subscribe();
+  }
+}
+```
+
+**Component Implementation Pattern:**
+```typescript
+export class SaleEditComponent implements OnInit {
+  private readonly store = inject(SalesStore);
+  private readonly route = inject(ActivatedRoute);
+
+  ngOnInit(): void {
+    // Load reference data (companies, clients, etc.)
+    this.companiesStore.loadCompanies();
+    this.clientsStore.loadClients();
+
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        // CORRECT: Load only the specific item needed
+        this.store.loadSaleById(params['id']);
+        this.loadSale(params['id']);
+      }
+    });
+  }
+
+  private loadSale(id: string): void {
+    // Wait for the specific sale to be loaded
+    this.store.sales$.pipe(
+      filter(sales => sales.length > 0),
+      take(1)
+    ).subscribe(sales => {
+      const sale = sales.find(s => s.id === id);
+      if (sale) {
+        // Populate form with sale data
+        this.form.patchValue({ ...sale });
+      }
+    });
+  }
+}
+```
+
+**WRONG Pattern (Never Do This):**
+```typescript
+// ❌ BAD: Loading ALL sales just to edit one
+ngOnInit(): void {
+  this.store.loadSales(); // Loads 1000s of records!
+  this.route.params.subscribe(params => {
+    if (params['id']) {
+      this.loadSale(params['id']); // Then finds one item
+    }
+  });
+}
+```
+
+**Implementation Checklist:**
+- ✅ All stores MUST have both `loadItems()` AND `loadItemById(id)` methods
+- ✅ Edit forms MUST use `loadItemById()`, never `loadItems()`
+- ✅ List views use `loadItems()` to show collections
+- ✅ Detail/preview views use `loadItemById()`
+- ✅ MockApiService already has `getItem(id)` methods - use them!
+
+**Examples in Codebase:**
+- Sales: `sales.store.ts:185-213` and `sale-create.component.ts:102`
+- Purchases: `purchases.store.ts:185-213` and `purchase-create.component.ts:102`
+
+#### 3. Dependency Injection with `inject()`
 
 Use the **`inject()` function** for dependency injection (Angular 20 best practice):
 
@@ -165,7 +285,7 @@ export class MyComponent {
 
 Constructor injection is still valid but `inject()` is preferred for consistency with functional guards/interceptors.
 
-#### 3. Functional Guards and Interceptors
+#### 4. Functional Guards and Interceptors
 
 All guards and interceptors use **functional patterns**:
 
@@ -195,7 +315,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 };
 ```
 
-#### 4. Lazy Loading with Standalone Components
+#### 5. Lazy Loading with Standalone Components
 
 Routes use `loadComponent` for components and `loadChildren` for feature routes:
 
@@ -215,7 +335,7 @@ export const routes: Routes = [
 ];
 ```
 
-#### 5. Multi-Tenancy Pattern
+#### 6. Multi-Tenancy Pattern
 
 The application supports multiple companies with context switching:
 - **CompanyContextService** maintains current company state
@@ -232,12 +352,43 @@ Roles: `admin`, `manager`, `user` with hierarchical permissions.
 - **Extend StoreBase<T>** for all feature stores
 - **Avoid manual subscriptions** - use `async` pipe or `takeUntil(destroy$)` pattern
 - **Do NOT use Angular Signals** for application state (they may be used for local UI state if needed)
+- **CRITICAL**: All stores MUST implement both `loadItems()` AND `loadItemById(id)` methods
+- **CRITICAL**: Edit/detail components MUST use `loadItemById()`, never `loadItems()` (see pattern #2 above)
 
 ### 2. Component Architecture
 - **All components are standalone** - declare `imports` array with dependencies
 - **Use `inject()` function** for dependency injection
 - **Keep templates simple** - move complex logic to component class
 - **Use reactive forms** with `FormBuilder` for user input
+
+#### Cascading Dropdown Pattern (CRITICAL)
+
+When populating edit forms with cascading dropdowns (e.g., Company → Client/Vendor), follow this EXACT pattern to avoid race conditions:
+
+```typescript
+// CORRECT: Wait for the specific option to be in the filtered list
+this.clientOptions$.pipe(
+  filter(options =>
+    options.length > 0 &&
+    (!sale.customerId || options.some(opt => opt.value === sale.customerId))
+  ),
+  take(1)
+).subscribe(() => {
+  this.form.patchValue({
+    clientId: sale.customerId || ''
+  }, { emitEvent: false }); // Prevent triggering valueChanges
+});
+```
+
+**Why this matters:**
+- Ensures cascading filter has processed before setting dependent dropdown
+- Verifies the specific option exists in filtered list
+- Uses `emitEvent: false` to prevent infinite loops
+
+**FormSelect Component Requirements:**
+- Placeholder option MUST use `[selected]="!value"` binding
+- Never use static `selected` attribute on placeholder
+- See `form-select.html:35` for reference
 
 ### 3. Routing and Guards
 - **Protect routes** with `authGuard` for authenticated areas

@@ -15,7 +15,7 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { User } from '../../../shared/models/user.model';
 import { Company } from '../../../shared/models/company.model';
 import { map, switchMap, combineLatestWith } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-user-list',
@@ -55,14 +55,15 @@ export class UserListComponent implements OnInit {
     })
   );
 
-  searchTerm = '';
+  private readonly searchTerm$ = new BehaviorSubject<string>('');
 
   filteredUsers$ = this.usersWithCompany$.pipe(
-    map(users => {
-      if (!this.searchTerm) {
+    combineLatestWith(this.searchTerm$),
+    map(([users, searchTerm]) => {
+      if (!searchTerm) {
         return users;
       }
-      const term = this.searchTerm.toLowerCase();
+      const term = searchTerm.toLowerCase();
       return users.filter(user =>
         user.firstName.toLowerCase().includes(term) ||
         user.lastName.toLowerCase().includes(term) ||
@@ -91,7 +92,7 @@ export class UserListComponent implements OnInit {
   ];
 
   onSearch(term: string): void {
-    this.searchTerm = term;
+    this.searchTerm$.next(term);
   }
 
   onCreate(): void {

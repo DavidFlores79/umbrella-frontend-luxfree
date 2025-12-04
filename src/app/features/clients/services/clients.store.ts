@@ -52,8 +52,14 @@ export class ClientsStore extends StoreBase<ClientsState> {
 
   /**
    * Sets up automatic reload when company context changes.
+   * Only reloads for non-admin users, as admins always see all companies' data.
    */
   private setupCompanyChangeReload(): void {
+    // Admins see all companies' data, so don't reload on company context changes
+    if (this.permissions.isAdmin()) {
+      return;
+    }
+
     this.companyContext.currentCompany$.pipe(
       distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
       skip(1) // Skip initial value to avoid double-loading
@@ -66,8 +72,14 @@ export class ClientsStore extends StoreBase<ClientsState> {
    * Ensures currentCompany is initialized before loading data.
    * This prevents the race condition where loadClients() is called
    * before currentCompanyId is set, which would cause ALL companies' data to load.
+   * Admins skip this check since they should see all companies' data.
    */
   private ensureInitialized(): Observable<void> {
+    // Admins don't need to wait for company context - they see all data
+    if (this.permissions.isAdmin()) {
+      return of(undefined);
+    }
+
     return this.companyContext.currentCompany$.pipe(
       filter(company => company !== null),
       take(1),

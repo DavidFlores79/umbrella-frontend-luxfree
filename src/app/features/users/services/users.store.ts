@@ -58,8 +58,14 @@ export class UsersStore extends StoreBase<UsersState> {
 
   /**
    * Sets up automatic reload when company context changes.
+   * Only reloads for non-admin users, as admins always see all companies' data.
    */
   private setupCompanyChangeReload(): void {
+    // Admins see all companies' data, so don't reload on company context changes
+    if (this.permissions.isAdmin()) {
+      return;
+    }
+
     this.companyContext.currentCompany$.pipe(
       distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
       skip(1) // Skip initial value to avoid double-loading

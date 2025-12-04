@@ -51,8 +51,14 @@ export class SalesStore extends StoreBase<SalesState> {
 
   /**
    * Sets up automatic reload when company context changes.
+   * Only reloads for non-admin users, as admins always see all companies' data.
    */
   private setupCompanyChangeReload(): void {
+    // Admins see all companies' data, so don't reload on company context changes
+    if (this.permissions.isAdmin()) {
+      return;
+    }
+
     this.companyContext.currentCompany$.pipe(
       distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
       skip(1) // Skip initial value to avoid double-loading
@@ -65,8 +71,14 @@ export class SalesStore extends StoreBase<SalesState> {
    * Ensures currentCompany is initialized before loading data.
    * This prevents the race condition where loadSales() is called
    * before currentCompanyId is set, which would cause ALL companies' data to load.
+   * Admins skip this check since they should see all companies' data.
    */
   private ensureInitialized(): Observable<void> {
+    // Admins don't need to wait for company context - they see all data
+    if (this.permissions.isAdmin()) {
+      return of(undefined);
+    }
+
     return this.companyContext.currentCompany$.pipe(
       filter(company => company !== null),
       take(1),
@@ -170,6 +182,40 @@ export class SalesStore extends StoreBase<SalesState> {
   selectSale(id: string): void {
     const sale = this.currentState.sales.find((s: Sale) => s.id === id);
     this.patchState({ selectedSale: sale || null });
+  }
+
+  /**
+   * Load a single sale by ID. More efficient than loadSales() for edit forms.
+   * When switching to real API, this will fetch only one sale from backend.
+   */
+  loadSaleById(id: string): void {
+    this.patchState({ loading: true, error: null });
+
+    this.mockApi.getSale(id).pipe(
+      tap(sale => {
+        // Check if sale already exists in store
+        const sales = this.currentState.sales;
+        const existingIndex = sales.findIndex(s => s.id === id);
+
+        const updatedSales = existingIndex >= 0
+          ? sales.map(s => s.id === id ? sale : s)
+          : [...sales, sale];
+
+        this.patchState({
+          sales: updatedSales,
+          selectedSale: sale,
+          loading: false,
+          error: null
+        });
+      }),
+      catchError(err => {
+        this.patchState({
+          error: err.message || 'Failed to load sale',
+          loading: false
+        });
+        return of(null);
+      })
+    ).subscribe();
   }
 
   clearError(): void {

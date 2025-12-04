@@ -51,8 +51,14 @@ export class PurchasesStore extends StoreBase<PurchasesState> {
 
   /**
    * Sets up automatic reload when company context changes.
+   * Only reloads for non-admin users, as admins always see all companies' data.
    */
   private setupCompanyChangeReload(): void {
+    // Admins see all companies' data, so don't reload on company context changes
+    if (this.permissions.isAdmin()) {
+      return;
+    }
+
     this.companyContext.currentCompany$.pipe(
       distinctUntilChanged((prev, curr) => prev?.id === curr?.id),
       skip(1) // Skip initial value to avoid double-loading
@@ -65,8 +71,14 @@ export class PurchasesStore extends StoreBase<PurchasesState> {
    * Ensures currentCompany is initialized before loading data.
    * This prevents the race condition where loadPurchases() is called
    * before currentCompanyId is set, which would cause ALL companies' data to load.
+   * Admins skip this check since they should see all companies' data.
    */
   private ensureInitialized(): Observable<void> {
+    // Admins don't need to wait for company context - they see all data
+    if (this.permissions.isAdmin()) {
+      return of(undefined);
+    }
+
     return this.companyContext.currentCompany$.pipe(
       filter(company => company !== null),
       take(1),
@@ -170,6 +182,40 @@ export class PurchasesStore extends StoreBase<PurchasesState> {
   selectPurchase(id: string): void {
     const purchase = this.currentState.purchases.find((s: Purchase) => s.id === id);
     this.patchState({ selectedPurchase: purchase || null });
+  }
+
+  /**
+   * Load a single purchase by ID. More efficient than loadPurchases() for edit forms.
+   * When switching to real API, this will fetch only one purchase from backend.
+   */
+  loadPurchaseById(id: string): void {
+    this.patchState({ loading: true, error: null });
+
+    this.mockApi.getPurchase(id).pipe(
+      tap(purchase => {
+        // Check if purchase already exists in store
+        const purchases = this.currentState.purchases;
+        const existingIndex = purchases.findIndex(p => p.id === id);
+
+        const updatedPurchases = existingIndex >= 0
+          ? purchases.map(p => p.id === id ? purchase : p)
+          : [...purchases, purchase];
+
+        this.patchState({
+          purchases: updatedPurchases,
+          selectedPurchase: purchase,
+          loading: false,
+          error: null
+        });
+      }),
+      catchError(err => {
+        this.patchState({
+          error: err.message || 'Failed to load purchase',
+          loading: false
+        });
+        return of(null);
+      })
+    ).subscribe();
   }
 
   clearError(): void {

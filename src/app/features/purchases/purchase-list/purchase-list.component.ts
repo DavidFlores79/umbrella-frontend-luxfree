@@ -13,7 +13,8 @@ import { EmptyState } from '../../../shared/components/ui/empty-state/empty-stat
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { CurrencyPipe } from '../../../shared/pipes/currency.pipe';
 import { Purchase } from '../../../shared/models/purchase.model';
-import { map } from 'rxjs/operators';
+import { map, combineLatestWith } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-purchase-list',
@@ -31,12 +32,13 @@ export class PurchaseListComponent implements OnInit {
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
 
-  searchTerm = '';
+  private readonly searchTerm$ = new BehaviorSubject<string>('');
 
   readonly filteredPurchases$ = this.purchases$.pipe(
-    map(purchases => {
-      if (!this.searchTerm) return purchases;
-      const term = this.searchTerm.toLowerCase();
+    combineLatestWith(this.searchTerm$),
+    map(([purchases, searchTerm]) => {
+      if (!searchTerm) return purchases;
+      const term = searchTerm.toLowerCase();
       return purchases.filter(purchase =>
         purchase.purchaseOrderNumber.toLowerCase().includes(term) ||
         purchase.vendorName.toLowerCase().includes(term) ||
@@ -64,7 +66,7 @@ export class PurchaseListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
-    this.searchTerm = term;
+    this.searchTerm$.next(term);
   }
 
   onCreate(): void {

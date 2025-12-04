@@ -13,10 +13,10 @@
 
   <select
     [id]="uniqueId"
-    [value]="value"
+    [(ngModel)]="value"
     [required]="required"
     [disabled]="disabled"
-    (change)="onSelectChange($event)"
+    (ngModelChange)="onModelChange($event)"
     (blur)="onBlur()"
     [attr.aria-required]="required"
     [attr.aria-invalid]="showError"
@@ -32,7 +32,7 @@
       'disabled:bg-gray-100 dark:disabled:bg-background-dark-DEFAULT disabled:cursor-not-allowed disabled:opacity-60': true
     }"
   >
-    <option value="" disabled selected>{{ placeholder }}</option>
+    <option value="" disabled>{{ placeholder }}</option>
     @for (option of options; track option.value) {
       <option [value]="option.value">{{ option.label }}</option>
     }

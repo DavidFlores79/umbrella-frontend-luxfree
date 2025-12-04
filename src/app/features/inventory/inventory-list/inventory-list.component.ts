@@ -9,7 +9,8 @@ import { Badge } from '../../../shared/components/ui/badge/badge';
 import { Alert } from '../../../shared/components/ui/alert/alert';
 import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
 import { InventoryItem } from '../../../shared/models/inventory.model';
-import { map } from 'rxjs/operators';
+import { map, combineLatestWith } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-inventory-list',
@@ -25,12 +26,13 @@ export class InventoryListComponent implements OnInit {
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
 
-  searchTerm = '';
+  private readonly searchTerm$ = new BehaviorSubject<string>('');
 
   readonly filteredItems$ = this.items$.pipe(
-    map(items => {
-      if (!this.searchTerm) return items;
-      const term = this.searchTerm.toLowerCase();
+    combineLatestWith(this.searchTerm$),
+    map(([items, searchTerm]) => {
+      if (!searchTerm) return items;
+      const term = searchTerm.toLowerCase();
       return items.filter(item =>
         item.productName.toLowerCase().includes(term) ||
         item.productSku.toLowerCase().includes(term) ||
@@ -44,7 +46,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
-    this.searchTerm = term;
+    this.searchTerm$.next(term);
   }
 
   onViewDetail(item: InventoryItem): void {

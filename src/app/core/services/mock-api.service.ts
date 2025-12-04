@@ -247,12 +247,13 @@ export class MockApiService {
       return throwError(() => new Error('Account is inactive')).pipe(delay(this.DELAY_MS));
     }
 
-    // Update last login
+    // Update last login and sync permissions with current role definition
     const index = users.findIndex(u => u.id === user.id);
     users[index].lastLogin = new Date();
+    users[index].permissions = ROLE_PERMISSIONS[user.role]; // Sync permissions with current role
     this.saveToStorage(this.STORAGE_KEYS.users, users);
 
-    const token = this.generateToken(user);
+    const token = this.generateToken(users[index]);
 
     return of({ token, user: users[index] }).pipe(delay(this.DELAY_MS));
   }
@@ -1552,6 +1553,7 @@ export class MockApiService {
       id: 'sale-1',
       companyId: 'company-1',
       invoiceNumber: 'INV-00001',
+      customerId: 'client-1', // Link to ABC Corporation client
       customerName: 'ABC Corporation',
       customerEmail: 'contact@abc-corp.com',
       customerPhone: '+1 (555) 200-0001',
@@ -1607,6 +1609,7 @@ export class MockApiService {
       id: 'purchase-1',
       companyId: 'company-1',
       purchaseOrderNumber: 'PO-00001',
+      vendorId: 'vendor-1', // Link to Tech Distributor Inc. vendor
       vendorName: 'Tech Distributor Inc.',
       vendorEmail: 'sales@techdist.com',
       vendorPhone: '+1 (555) 300-0001',

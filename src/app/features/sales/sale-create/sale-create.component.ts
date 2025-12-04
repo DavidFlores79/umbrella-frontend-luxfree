@@ -12,7 +12,7 @@ import { Button } from '../../../shared/components/ui/button/button';
 import { FormInput } from '../../../shared/components/ui/forms/form-input/form-input';
 import { FormSelect } from '../../../shared/components/ui/forms/form-select/form-select';
 import { Alert } from '../../../shared/components/ui/alert/alert';
-import { map, startWith, combineLatestWith } from 'rxjs/operators';
+import { map, combineLatestWith, filter, take, skip } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -98,6 +98,8 @@ export class SaleCreateComponent implements OnInit {
       if (params['id']) {
         this.isEditMode = true;
         this.saleId = params['id'];
+        // Load only the specific sale needed (more efficient for real API)
+        this.store.loadSaleById(params['id']);
         this.loadSale(params['id']);
       }
     });
@@ -106,6 +108,7 @@ export class SaleCreateComponent implements OnInit {
   private initializeForm(): void {
     this.form = this.fb.group({
       companyId: ['', Validators.required],
+      clientId: ['', Validators.required],
       customerName: ['', [Validators.required, Validators.minLength(2)]],
       customerEmail: ['', [Validators.required, Validators.email]],
       customerPhone: [''],
@@ -113,6 +116,11 @@ export class SaleCreateComponent implements OnInit {
       status: ['draft', Validators.required],
       paymentMethod: [''],
       notes: ['']
+    });
+
+    // Auto-populate customer details when client is selected
+    this.form.get('clientId')?.valueChanges.subscribe(clientId => {
+      this.onClientChange(clientId);
     });
   }
 
@@ -138,6 +146,21 @@ export class SaleCreateComponent implements OnInit {
     }
   }
 
+  onClientChange(clientId: string): void {
+    if (!clientId) return;
+
+    this.clientsStore.clients$.subscribe(clients => {
+      const client = clients.find(c => c.id === clientId);
+      if (client) {
+        this.form.patchValue({
+          customerName: client.name,
+          customerEmail: client.email,
+          customerPhone: client.phone || ''
+        }, { emitEvent: false });
+      }
+    });
+  }
+
   onProductChange(index: number): void {
     const item = this.items.at(index);
     const productId = item.get('productId')?.value;
@@ -151,29 +174,108 @@ export class SaleCreateComponent implements OnInit {
   }
 
   private loadSale(id: string): void {
-    this.store.sales$.subscribe(sales => {
+    // Wait for sales to be loaded first
+    this.store.sales$.pipe(
+      filter(sales => sales.length > 0),
+      take(1)
+    ).subscribe(sales => {
       const sale = sales.find(s => s.id === id);
       if (sale) {
-        // Set selected company first for cascading filtering
-        this.selectedCompanyId$.next(sale.companyId);
+        // First, wait for companies to load so the company dropdown has options
+        this.companiesStore.companies$.pipe(
+          filter(companies => companies.length > 0),
+          take(1)
+        ).subscribe(companies => {
+          // Set the company FIRST - this triggers the cascading filter
+          this.selectedCompanyId$.next(sale.companyId);
+          console.log('Available companies:', companies);
+          console.log('Setting companyId:', sale.companyId, 'Type:', typeof sale.companyId);
+          this.form.patchValue({
+            companyId: sale.companyId
+          });
+          console.log('Form companyId value after patch:', this.form.get('companyId')?.value);
 
-        this.form.patchValue({
-          companyId: sale.companyId,
-          customerName: sale.customerName,
-          customerEmail: sale.customerEmail,
-          customerPhone: sale.customerPhone || '',
-          status: sale.status,
-          paymentMethod: sale.paymentMethod || '',
-          notes: sale.notes || ''
-        });
+          // Wait for clients to be loaded from the store
+          this.clientsStore.clients$.pipe(
+            filter(clients => clients.length > 0),
+            take(1)
+          ).subscribe(() => {
+            // Patch other form fields except clientId
+            this.form.patchValue({
+              customerName: sale.customerName,
+              customerEmail: sale.customerEmail,
+              customerPhone: sale.customerPhone || '',
+              status: sale.status,
+              paymentMethod: sale.paymentMethod || '',
+              notes: sale.notes || ''
+            });
 
-        this.items.clear();
-        sale.items.forEach(item => {
-          this.items.push(this.fb.group({
-            productId: [item.productId, Validators.required],
-            quantity: [item.quantity, [Validators.required, Validators.min(1)]],
-            unitPrice: [item.unitPrice, [Validators.required, Validators.min(0)]]
-          }));
+            // Wait for the specific client to be in the filtered options
+            // This ensures the cascading filter has processed
+            console.log('Sale customerId:', sale.customerId);
+            console.log('Sale customerEmail:', sale.customerEmail);
+            console.log('Current selectedCompanyId:', this.selectedCompanyId$.value);
+            
+            this.clientOptions$.pipe(
+              filter(options => {
+                console.log('clientOptions$ emitted:', options.length, 'options');
+                console.log('Looking for customerId:', sale.customerId);
+                
+                // If no customerId, try to find client by email
+                let clientId = sale.customerId;
+                if (!clientId && sale.customerEmail) {
+                  this.clientsStore.clients$.pipe(take(1)).subscribe(clients => {
+                    const matchingClient = clients.find(c => 
+                      c.email.toLowerCase() === sale.customerEmail.toLowerCase() &&
+                      c.companyId === sale.companyId
+                    );
+                    if (matchingClient) {
+                      console.log('Found matching client by email:', matchingClient);
+                      clientId = matchingClient.id;
+                    }
+                  });
+                }
+                
+                const hasClient = !clientId || options.some(opt => opt.value === clientId);
+                console.log('Has client in options:', hasClient, 'clientId:', clientId);
+                return options.length > 0 && hasClient;
+              }),
+              take(1)
+            ).subscribe(options => {
+              console.log('✅ Available client options:', options);
+              
+              // Try to find matching client by email if no customerId
+              let clientIdToSet = sale.customerId;
+              if (!clientIdToSet && sale.customerEmail) {
+                this.clientsStore.clients$.pipe(take(1)).subscribe(clients => {
+                  const matchingClient = clients.find(c => 
+                    c.email.toLowerCase() === sale.customerEmail.toLowerCase() &&
+                    c.companyId === sale.companyId
+                  );
+                  if (matchingClient) {
+                    clientIdToSet = matchingClient.id;
+                    console.log('✅ Auto-matched client by email:', matchingClient.name);
+                  }
+                });
+              }
+              
+              console.log('✅ Setting clientId:', clientIdToSet);
+              this.form.patchValue({
+                clientId: clientIdToSet || ''
+              }, { emitEvent: false });
+              console.log('✅ Form clientId value after patch:', this.form.get('clientId')?.value);
+            });
+
+            // Load items
+            this.items.clear();
+            sale.items.forEach(item => {
+              this.items.push(this.fb.group({
+                productId: [item.productId, Validators.required],
+                quantity: [item.quantity, [Validators.required, Validators.min(1)]],
+                unitPrice: [item.unitPrice, [Validators.required, Validators.min(0)]]
+              }));
+            });
+          });
         });
       }
     });
@@ -190,6 +292,7 @@ export class SaleCreateComponent implements OnInit {
 
     const saleData: any = {
       companyId: formValue.companyId,
+      customerId: formValue.clientId || undefined,
       customerName: formValue.customerName,
       customerEmail: formValue.customerEmail,
       customerPhone: formValue.customerPhone || undefined,
@@ -210,10 +313,13 @@ export class SaleCreateComponent implements OnInit {
       this.store.createSale(saleData);
     }
 
-    this.loading$.subscribe(loading => {
-      if (!loading && this.submitted) {
-        this.router.navigate(['/sales']);
-      }
+    // Wait for the loading cycle to complete (skip current value, wait for true, then false)
+    this.loading$.pipe(
+      skip(1), // Skip current emission
+      filter(loading => !loading), // Wait until loading is false
+      take(1) // Take only the first false value
+    ).subscribe(() => {
+      this.router.navigate(['/sales']);
     });
   }
 

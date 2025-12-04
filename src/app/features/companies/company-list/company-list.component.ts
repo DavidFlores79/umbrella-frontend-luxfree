@@ -11,7 +11,8 @@ import { Alert } from '../../../shared/components/ui/alert/alert';
 import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { Company } from '../../../shared/models/company.model';
-import { map } from 'rxjs/operators';
+import { map, combineLatestWith } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-company-list',
@@ -37,14 +38,15 @@ export class CompanyListComponent implements OnInit {
   readonly loading$ = this.store.loading$;
   readonly error$ = this.store.error$;
 
-  searchTerm = '';
+  private readonly searchTerm$ = new BehaviorSubject<string>('');
 
   readonly filteredCompanies$ = this.companies$.pipe(
-    map(companies => {
-      if (!this.searchTerm) {
+    combineLatestWith(this.searchTerm$),
+    map(([companies, searchTerm]) => {
+      if (!searchTerm) {
         return companies;
       }
-      const term = this.searchTerm.toLowerCase();
+      const term = searchTerm.toLowerCase();
       return companies.filter(company =>
         company.name.toLowerCase().includes(term) ||
         company.email.toLowerCase().includes(term) ||
@@ -90,7 +92,7 @@ export class CompanyListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
-    this.searchTerm = term;
+    this.searchTerm$.next(term);
   }
 
   onCreate(): void {

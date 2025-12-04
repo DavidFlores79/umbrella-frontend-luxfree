@@ -1,0 +1,38 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-text">{{ isEditMode ? 'Edit Vendor' : 'Create Vendor' }}</h1>
+    <p class="mt-1 text-sm text-text-light">{{ isEditMode ? 'Update vendor information' : 'Add a new supplier to your company' }}</p>
+  </div>
+
+  @if (error$ | async; as error) {
+    <app-alert type="error" [dismissible]="true" (dismissed)="dismissError()" class="mb-6">{{ error }}</app-alert>
+  }
+
+  <app-card>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-medium text-text mb-4">Vendor Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @if (isAdmin) {
+              <app-form-select class="md:col-span-2" formControlName="companyId" label="Company" placeholder="Select company" [options]="(companyOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('companyId')"></app-form-select>
+            }
+            <app-form-input formControlName="name" label="Vendor Name" placeholder="Enter vendor name" [required]="true" [errorMessage]="getFieldError('name')"></app-form-input>
+            <app-form-input formControlName="email" label="Email" type="email" placeholder="vendor@example.com" [required]="true" [errorMessage]="getFieldError('email')"></app-form-input>
+            <app-form-input formControlName="phone" label="Phone" type="tel" placeholder="+1 (555) 123-4567" [required]="true" [errorMessage]="getFieldError('phone')"></app-form-input>
+            <app-form-input formControlName="taxId" label="Tax ID" placeholder="Tax identification number" [errorMessage]="getFieldError('taxId')"></app-form-input>
+            <app-form-input class="md:col-span-2" formControlName="address" label="Address" placeholder="Street address" [errorMessage]="getFieldError('address')"></app-form-input>
+            <app-form-input class="md:col-span-2" formControlName="notes" label="Notes" placeholder="Additional notes about this vendor" [errorMessage]="getFieldError('notes')"></app-form-input>
+          </div>
+        </div>
+
+        <div class="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <app-button type="submit" variant="primary" [loading]="(loading$ | async) || false" [disabled]="(loading$ | async) || false">
+            {{ isEditMode ? 'Update Vendor' : 'Create Vendor' }}
+          </app-button>
+          <app-button type="button" variant="secondary" (click)="onCancel()" [disabled]="(loading$ | async) || false">Cancel</app-button>
+        </div>
+      </div>
+    </form>
+  </app-card>
+</div>

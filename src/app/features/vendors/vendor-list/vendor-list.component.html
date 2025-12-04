@@ -64,7 +64,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                 @if (canEdit()) {
                   <a
-                    [routerLink]="['/vendors', vendor.id, 'edit']"
+                    [routerLink]="['/vendors/edit', vendor.id]"
                     class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                     Edit
                   </a>

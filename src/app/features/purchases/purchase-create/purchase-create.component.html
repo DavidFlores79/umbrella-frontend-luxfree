@@ -16,9 +16,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <app-form-select class="md:col-span-2"
               formControlName="companyId" label="Company" [options]="(companyOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('companyId')"></app-form-select>
-            <app-form-input formControlName="vendorName" label="Vendor Name" placeholder="Enter vendor name" [required]="true" [errorMessage]="getFieldError('vendorName')"></app-form-input>
-            <app-form-input formControlName="vendorEmail" label="Email" type="email" placeholder="vendor@example.com" [required]="true" [errorMessage]="getFieldError('vendorEmail')"></app-form-input>
-            <app-form-input formControlName="vendorPhone" label="Phone" type="tel" placeholder="+1 (555) 123-4567" [errorMessage]="getFieldError('vendorPhone')"></app-form-input>
+            <app-form-select class="md:col-span-2"
+              formControlName="vendorId" label="Vendor" [options]="(vendorOptions$ | async) || []" [required]="true" [errorMessage]="getFieldError('vendorId')"></app-form-select>
+            <app-form-input formControlName="vendorName" label="Vendor Name" placeholder="Auto-populated from selected vendor" [required]="true" [errorMessage]="getFieldError('vendorName')"></app-form-input>
+            <app-form-input formControlName="vendorEmail" label="Email" type="email" placeholder="Auto-populated from selected vendor" [required]="true" [errorMessage]="getFieldError('vendorEmail')"></app-form-input>
+            <app-form-input formControlName="vendorPhone" label="Phone" type="tel" placeholder="Auto-populated from selected vendor" [errorMessage]="getFieldError('vendorPhone')"></app-form-input>
           </div>
         </div>
 

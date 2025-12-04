@@ -1,4 +1,4 @@
-import { Component, Input, forwardRef } from '@angular/core';
+import { Component, Input, forwardRef, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -21,6 +21,8 @@ export interface SelectOption {
   ]
 })
 export class FormSelect implements ControlValueAccessor {
+  private readonly cdr = inject(ChangeDetectorRef);
+
   @Input() label = '';
   @Input() options: SelectOption[] = [];
   @Input() placeholder = 'Select an option';
@@ -41,6 +43,11 @@ export class FormSelect implements ControlValueAccessor {
     this.onChange(this.value);
   }
 
+  onModelChange(value: string | number): void {
+    console.log('onModelChange called with:', value);
+    this.onChange(value);
+  }
+
   onBlur(): void {
     this.touched = true;
     this.onTouched();
@@ -48,6 +55,8 @@ export class FormSelect implements ControlValueAccessor {
 
   writeValue(value: string | number): void {
     this.value = value || '';
+    console.log('FormSelect writeValue called with:', value, 'Type:', typeof value);
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: (value: string | number) => void): void {
