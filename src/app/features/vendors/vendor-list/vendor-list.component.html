@@ -1,89 +1,172 @@
 <div class="p-6">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Vendors</h1>
+  <!-- Header -->
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-text">Vendors</h1>
+      <p class="mt-1 text-sm text-text-light">Manage your vendor relationships</p>
+    </div>
     @if (canCreate()) {
-      <a
-        routerLink="/vendors/create"
-        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-        + New Vendor
-      </a>
+      <app-button variant="primary" (click)="onCreate()">
+        <span class="mr-2">+</span>
+        Create Vendor
+      </app-button>
     }
   </div>
 
-  @if (loading$ | async) {
-    <div class="flex justify-center items-center py-12">
-      <div class="text-gray-500 dark:text-gray-400">Loading vendors...</div>
-    </div>
-  } @else if (error$ | async; as error) {
-    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">
-      {{ error }}
-    </div>
-  } @else {
-    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-900">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Phone</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          @if ((vendors$ | async)?.length === 0) {
-            <tr>
-              <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                @if (canCreate()) {
-                  No vendors found. Click "New Vendor" to create one.
-                } @else {
-                  No vendors available to display.
-                }
-              </td>
-            </tr>
-          }
-          @for (vendor of vendors$ | async; track vendor.id) {
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ vendor.name }}</div>
-                @if (vendor.taxId) {
-                  <div class="text-sm text-gray-500 dark:text-gray-400">Tax ID: {{ vendor.taxId }}</div>
-                }
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ vendor.email }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ vendor.phone }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <button
+  <!-- Error Alert -->
+  <app-alert
+    *ngIf="error$ | async as error"
+    type="error"
+    [dismissible]="true"
+    (dismissed)="dismissError()"
+    class="mb-6"
+  >
+    {{ error }}
+  </app-alert>
+
+  <!-- Search Bar -->
+  <div class="mb-6">
+    <app-search-bar
+      placeholder="Search vendors by name, email, phone, or tax ID..."
+      (searchChange)="onSearch($event)"
+    ></app-search-bar>
+  </div>
+
+  <!-- Vendors Table -->
+  <app-card [loading]="(loading$ | async) || false">
+    <div *ngIf="(filteredVendors$ | async) as vendors; else loading">
+      <div *ngIf="vendors.length > 0; else empty">
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Name
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Email
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Phone
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Tax ID
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-text-light uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-text-light uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              @for (vendor of vendors; track vendor.id) {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-text">{{ vendor.name }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-text-light">{{ vendor.email }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-text-light">{{ vendor.phone || '-' }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-text-light">{{ vendor.taxId || '-' }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <app-badge
+                      [variant]="vendor.isActive ? 'success' : 'warning'"
+                      (click)="toggleActive(vendor.id, vendor.isActive)"
+                      class="cursor-pointer"
+                    >
+                      {{ vendor.isActive ? 'Active' : 'Inactive' }}
+                    </app-badge>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                    @if (canEdit()) {
+                      <button
+                        (click)="onEdit(vendor)"
+                        class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+                      >
+                        Edit
+                      </button>
+                    }
+                    @if (canDelete()) {
+                      <button
+                        (click)="deleteVendor(vendor.id)"
+                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 ml-3"
+                      >
+                        Delete
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="md:hidden space-y-4">
+          @for (vendor of vendors; track vendor.id) {
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h3 class="font-medium text-text">{{ vendor.name }}</h3>
+                  <p class="text-sm text-text-light">{{ vendor.email }}</p>
+                </div>
+                <app-badge
+                  [variant]="vendor.isActive ? 'success' : 'warning'"
                   (click)="toggleActive(vendor.id, vendor.isActive)"
-                  [class]="vendor.isActive
-                    ? 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                    : 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'">
+                  class="cursor-pointer"
+                >
                   {{ vendor.isActive ? 'Active' : 'Inactive' }}
-                </button>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                </app-badge>
+              </div>
+              <div class="text-sm text-text-light mb-3">
+                <p>Phone: {{ vendor.phone || '-' }}</p>
+                <p>Tax ID: {{ vendor.taxId || '-' }}</p>
+              </div>
+              <div class="flex justify-end gap-2">
                 @if (canEdit()) {
-                  <a
-                    [routerLink]="['/vendors/edit', vendor.id]"
-                    class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
+                  <app-button variant="secondary" size="sm" (click)="onEdit(vendor)">
                     Edit
-                  </a>
+                  </app-button>
                 }
                 @if (canDelete()) {
-                  <button
-                    (click)="deleteVendor(vendor.id)"
-                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 ml-3">
+                  <app-button variant="danger" size="sm" (click)="deleteVendor(vendor.id)">
                     Delete
-                  </button>
+                  </app-button>
                 }
-                @if (!canEdit() && !canDelete()) {
-                  <span class="text-gray-400 text-xs">View only</span>
-                }
-              </td>
-            </tr>
+              </div>
+            </div>
           }
-        </tbody>
-      </table>
+        </div>
+      </div>
     </div>
-  }
+
+    <ng-template #loading>
+      <div class="flex justify-center items-center py-12">
+        <div class="text-text-light">Loading vendors...</div>
+      </div>
+    </ng-template>
+
+    <ng-template #empty>
+      <app-empty-state
+        title="No vendors found"
+        [description]="canCreate() ? 'Get started by creating a new vendor.' : 'No vendors available to display.'"
+        icon="truck"
+      >
+        @if (canCreate()) {
+          <app-button variant="primary" (click)="onCreate()">
+            <span class="mr-2">+</span>
+            Create Vendor
+          </app-button>
+        }
+      </app-empty-state>
+    </ng-template>
+  </app-card>
 </div>
