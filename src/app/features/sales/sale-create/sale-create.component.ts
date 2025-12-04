@@ -215,17 +215,17 @@ export class SaleCreateComponent implements OnInit {
             console.log('Sale customerId:', sale.customerId);
             console.log('Sale customerEmail:', sale.customerEmail);
             console.log('Current selectedCompanyId:', this.selectedCompanyId$.value);
-            
+
             this.clientOptions$.pipe(
               filter(options => {
                 console.log('clientOptions$ emitted:', options.length, 'options');
                 console.log('Looking for customerId:', sale.customerId);
-                
+
                 // If no customerId, try to find client by email
                 let clientId = sale.customerId;
                 if (!clientId && sale.customerEmail) {
                   this.clientsStore.clients$.pipe(take(1)).subscribe(clients => {
-                    const matchingClient = clients.find(c => 
+                    const matchingClient = clients.find(c =>
                       c.email.toLowerCase() === sale.customerEmail.toLowerCase() &&
                       c.companyId === sale.companyId
                     );
@@ -235,7 +235,7 @@ export class SaleCreateComponent implements OnInit {
                     }
                   });
                 }
-                
+
                 const hasClient = !clientId || options.some(opt => opt.value === clientId);
                 console.log('Has client in options:', hasClient, 'clientId:', clientId);
                 return options.length > 0 && hasClient;
@@ -243,12 +243,12 @@ export class SaleCreateComponent implements OnInit {
               take(1)
             ).subscribe(options => {
               console.log('✅ Available client options:', options);
-              
+
               // Try to find matching client by email if no customerId
               let clientIdToSet = sale.customerId;
               if (!clientIdToSet && sale.customerEmail) {
                 this.clientsStore.clients$.pipe(take(1)).subscribe(clients => {
-                  const matchingClient = clients.find(c => 
+                  const matchingClient = clients.find(c =>
                     c.email.toLowerCase() === sale.customerEmail.toLowerCase() &&
                     c.companyId === sale.companyId
                   );
@@ -258,7 +258,7 @@ export class SaleCreateComponent implements OnInit {
                   }
                 });
               }
-              
+
               console.log('✅ Setting clientId:', clientIdToSet);
               this.form.patchValue({
                 clientId: clientIdToSet || ''
