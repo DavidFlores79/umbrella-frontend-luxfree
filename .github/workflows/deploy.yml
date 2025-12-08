@@ -1,0 +1,52 @@
+name: Deploy Angular App to Hostinger
+
+on:
+  push:
+    branches:
+      - feat/umbrella-frontend-mvp
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.1'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build Angular application
+        run: yarn build --configuration=production
+
+      - name: Deploy to Hostinger
+        uses: easingthemes/ssh-deploy@v5.0.0
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          ARGS: "-rlgoDzvc --delete"
+          SOURCE: "dist/umbrella-frontend/browser/"
+          REMOTE_HOST: ${{ secrets.HOSTINGER_HOST }}
+          REMOTE_USER: ${{ secrets.HOSTINGER_USER }}
+          REMOTE_PORT: ${{ secrets.HOSTINGER_PORT }}
+          TARGET: ${{ secrets.HOSTINGER_TARGET }}
+          EXCLUDE: ".htaccess"
+
+      - name: Wait for health check and perform it
+        run: |
+          echo "Waiting 10 seconds for server to stabilize..."
+          sleep 10
+
+          echo "Performing Health Check on ${{ secrets.PRODUCTION_URL }}..."
+          if curl -fsL -o /dev/null --max-time 15 ${{ secrets.PRODUCTION_URL }}; then
+            echo "✔️ Health Check successful: Application is running correctly."
+          else
+            echo "❌ Health Check failed: Application is not available."
+            exit 1
+          fi
