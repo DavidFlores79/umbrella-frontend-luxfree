@@ -334,7 +334,7 @@ export class DashboardStore extends StoreBase<DashboardState> {
     // Combine and sort by date descending
     return [...saleTransactions, ...purchaseTransactions]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 10); // Last 10 transactions
+      .slice(0, 3); // Last 3 transactions
   }
 
   private groupByMonth(items: any[], dateField: string): { labels: string[], values: number[] } {
