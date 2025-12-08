@@ -55,7 +55,14 @@ export class DashboardComponent implements OnInit {
       },
       tooltip: {
         mode: 'index',
-        intersect: false
+        intersect: false,
+        callbacks: {
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = this.currencyService.formatCompanyCurrency(Number(context.parsed.y));
+            return `${label}: ${value}`;
+          }
+        }
       }
     },
     scales: {
@@ -74,11 +81,71 @@ export class DashboardComponent implements OnInit {
     plugins: {
       legend: {
         display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            return `Count: ${context.parsed.y}`;
+          }
+        }
       }
     },
     scales: {
       y: {
-        beginAtZero: true
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
+  };
+
+  salesVsExpensesOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = this.currencyService.formatCompanyCurrency(Number(context.parsed.y));
+            return `${label}: ${value}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => this.currencyService.formatCompanyCurrency(Number(value))
+        }
+      }
+    }
+  };
+
+  revenueBreakdownOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom'
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const label = context.label || '';
+            const value = this.currencyService.formatCompanyCurrency(Number(context.parsed));
+            return `${label}: ${value}`;
+          }
+        }
       }
     }
   };

@@ -1545,101 +1545,197 @@ export class MockApiService {
   }
 
   private seedSales(): void {
-    // Add sample sales data
     const sales: Sale[] = [];
+    const clients = [
+      { id: 'client-1', name: 'ABC Corporation', email: 'contact@abc-corp.com', phone: '+1 (555) 200-0001' },
+      { id: 'client-2', name: 'XYZ Industries', email: 'sales@xyz-ind.com', phone: '+1 (555) 200-0002' },
+      { id: 'client-3', name: 'Tech Startup LLC', email: 'info@techstartup.com', phone: '+1 (555) 200-0003' },
+      { id: 'client-4', name: 'Enterprise Solutions', email: 'contact@entsol.com', phone: '+1 (555) 200-0004' },
+      { id: 'client-5', name: 'Digital Agency', email: 'hello@digitalagency.com', phone: '+1 (555) 200-0005' }
+    ];
 
-    // Tech Solutions sales (5 sales)
-    const techSale1: Sale = {
-      id: 'sale-1',
-      companyId: 'company-1',
-      invoiceNumber: 'INV-00001',
-      customerId: 'client-1', // Link to ABC Corporation client
-      customerName: 'ABC Corporation',
-      customerEmail: 'contact@abc-corp.com',
-      customerPhone: '+1 (555) 200-0001',
-      items: [
-        {
-          id: 'sli-1',
-          productId: 'product-tech-1',
-          productName: 'Dell XPS 15 Laptop',
-          productSku: 'LAPTOP-001',
-          quantity: 2,
-          unitPrice: 1299.99,
-          taxRate: 8.5,
-          taxAmount: 221.00,
-          subtotal: 2599.98,
-          total: 2820.98
-        },
-        {
-          id: 'sli-2',
-          productId: 'product-tech-3',
-          productName: 'Logitech MX Master 3',
-          productSku: 'MOUSE-001',
-          quantity: 2,
-          unitPrice: 99.99,
-          taxRate: 8.5,
-          taxAmount: 17.00,
-          subtotal: 199.98,
-          total: 216.98
+    const products = [
+      { id: 'product-tech-1', name: 'Dell XPS 15 Laptop', sku: 'LAPTOP-001', price: 1299.99 },
+      { id: 'product-tech-2', name: 'HP Monitor 27"', sku: 'MONITOR-001', price: 349.99 },
+      { id: 'product-tech-3', name: 'Logitech MX Master 3', sku: 'MOUSE-001', price: 99.99 },
+      { id: 'product-tech-4', name: 'Dell Docking Station', sku: 'DOCK-001', price: 249.99 },
+      { id: 'product-tech-5', name: 'Webcam HD Pro', sku: 'WEBCAM-001', price: 129.99 }
+    ];
+
+    const statuses: Array<'paid' | 'pending' | 'draft'> = ['paid', 'paid', 'paid', 'paid', 'pending', 'draft'];
+    const paymentMethods = ['Credit Card', 'Bank Transfer', 'PayPal', 'Cash'];
+
+    let invoiceCounter = 1;
+    const now = new Date();
+
+    // Generate 40-50 sales across the last 6 months
+    for (let monthOffset = 5; monthOffset >= 0; monthOffset--) {
+      const salesInMonth = 6 + Math.floor(Math.random() * 4); // 6-10 sales per month
+
+      for (let i = 0; i < salesInMonth; i++) {
+        const client = clients[Math.floor(Math.random() * clients.length)];
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+
+        // Random date within the month
+        const saleDate = new Date(now.getFullYear(), now.getMonth() - monthOffset, Math.floor(Math.random() * 28) + 1);
+
+        // Generate 1-3 items per sale
+        const itemCount = 1 + Math.floor(Math.random() * 3);
+        const items = [];
+        let subtotal = 0;
+
+        for (let j = 0; j < itemCount; j++) {
+          const product = products[Math.floor(Math.random() * products.length)];
+          const quantity = 1 + Math.floor(Math.random() * 5);
+          const unitPrice = product.price;
+          const itemSubtotal = quantity * unitPrice;
+          const taxRate = 8.5;
+          const taxAmount = (itemSubtotal * taxRate) / 100;
+          const total = itemSubtotal + taxAmount;
+
+          items.push({
+            id: `sli-${invoiceCounter}-${j}`,
+            productId: product.id,
+            productName: product.name,
+            productSku: product.sku,
+            quantity,
+            unitPrice,
+            taxRate,
+            taxAmount: parseFloat(taxAmount.toFixed(2)),
+            subtotal: parseFloat(itemSubtotal.toFixed(2)),
+            total: parseFloat(total.toFixed(2))
+          });
+
+          subtotal += itemSubtotal;
         }
-      ],
-      subtotal: 2799.96,
-      taxAmount: 238.00,
-      total: 3037.96,
-      status: 'paid',
-      paymentMethod: 'Credit Card',
-      paymentDate: new Date('2025-01-20'),
-      createdBy: 'user-1',
-      createdAt: new Date('2025-01-20'),
-      updatedAt: new Date('2025-01-20')
-    };
 
-    sales.push(techSale1);
+        const taxAmount = (subtotal * 8.5) / 100;
+        const total = subtotal + taxAmount;
 
-    // Add more sample sales as needed
+        sales.push({
+          id: `sale-${invoiceCounter}`,
+          companyId: 'company-1',
+          invoiceNumber: `INV-${String(invoiceCounter).padStart(5, '0')}`,
+          customerId: client.id,
+          customerName: client.name,
+          customerEmail: client.email,
+          customerPhone: client.phone,
+          items,
+          subtotal: parseFloat(subtotal.toFixed(2)),
+          taxAmount: parseFloat(taxAmount.toFixed(2)),
+          total: parseFloat(total.toFixed(2)),
+          status,
+          paymentMethod,
+          paymentDate: status === 'paid' ? saleDate : undefined,
+          createdBy: 'user-1',
+          createdAt: saleDate,
+          updatedAt: saleDate
+        });
+
+        invoiceCounter++;
+      }
+    }
+
     this.saveToStorage(this.STORAGE_KEYS.sales, sales);
   }
 
   private seedPurchases(): void {
-    // Add sample purchase data
     const purchases: Purchase[] = [];
+    const vendors = [
+      { id: 'vendor-1', name: 'Tech Distributor Inc.', email: 'sales@techdist.com', phone: '+1 (555) 300-0001' },
+      { id: 'vendor-2', name: 'Office Supplies Plus', email: 'orders@officesupplies.com', phone: '+1 (555) 300-0002' },
+      { id: 'vendor-3', name: 'Global Electronics', email: 'contact@globalelec.com', phone: '+1 (555) 300-0003' }
+    ];
 
-    // Sample purchase
-    const purchase1: Purchase = {
-      id: 'purchase-1',
-      companyId: 'company-1',
-      purchaseOrderNumber: 'PO-00001',
-      vendorId: 'vendor-1', // Link to Tech Distributor Inc. vendor
-      vendorName: 'Tech Distributor Inc.',
-      vendorEmail: 'sales@techdist.com',
-      vendorPhone: '+1 (555) 300-0001',
-      items: [
-        {
-          id: 'pli-1',
-          productId: 'product-tech-1',
-          productName: 'Dell XPS 15 Laptop',
-          productSku: 'LAPTOP-001',
-          quantity: 10,
-          unitCost: 950.00,
-          taxRate: 8.5,
-          taxAmount: 807.50,
-          subtotal: 9500.00,
-          total: 10307.50
+    const products = [
+      { id: 'product-tech-1', name: 'Dell XPS 15 Laptop', sku: 'LAPTOP-001', cost: 950.00 },
+      { id: 'product-tech-2', name: 'HP Monitor 27"', sku: 'MONITOR-001', cost: 220.00 },
+      { id: 'product-tech-3', name: 'Logitech MX Master 3', sku: 'MOUSE-001', cost: 65.00 },
+      { id: 'product-tech-4', name: 'Dell Docking Station', sku: 'DOCK-001', cost: 180.00 },
+      { id: 'product-tech-5', name: 'Webcam HD Pro', sku: 'WEBCAM-001', cost: 85.00 }
+    ];
+
+    const statuses: Array<'draft' | 'ordered' | 'received' | 'paid' | 'cancelled'> =
+      ['received', 'received', 'paid', 'paid', 'ordered', 'draft'];
+    const paymentMethods = ['Bank Transfer', 'Credit Card', 'Wire Transfer', 'Check'];
+
+    let poCounter = 1;
+    const now = new Date();
+
+    // Generate 30-40 purchases across the last 6 months
+    for (let monthOffset = 5; monthOffset >= 0; monthOffset--) {
+      const purchasesInMonth = 4 + Math.floor(Math.random() * 4); // 4-8 purchases per month
+
+      for (let i = 0; i < purchasesInMonth; i++) {
+        const vendor = vendors[Math.floor(Math.random() * vendors.length)];
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+
+        // Random date within the month
+        const purchaseDate = new Date(now.getFullYear(), now.getMonth() - monthOffset, Math.floor(Math.random() * 28) + 1);
+
+        // Generate 1-3 items per purchase
+        const itemCount = 1 + Math.floor(Math.random() * 3);
+        const items = [];
+        let subtotal = 0;
+
+        for (let j = 0; j < itemCount; j++) {
+          const product = products[Math.floor(Math.random() * products.length)];
+          const quantity = 5 + Math.floor(Math.random() * 15); // 5-20 units
+          const unitCost = product.cost;
+          const itemSubtotal = quantity * unitCost;
+          const taxRate = 8.5;
+          const taxAmount = (itemSubtotal * taxRate) / 100;
+          const total = itemSubtotal + taxAmount;
+
+          items.push({
+            id: `pli-${poCounter}-${j}`,
+            productId: product.id,
+            productName: product.name,
+            productSku: product.sku,
+            quantity,
+            unitCost,
+            taxRate,
+            taxAmount: parseFloat(taxAmount.toFixed(2)),
+            subtotal: parseFloat(itemSubtotal.toFixed(2)),
+            total: parseFloat(total.toFixed(2))
+          });
+
+          subtotal += itemSubtotal;
         }
-      ],
-      subtotal: 9500.00,
-      taxAmount: 807.50,
-      total: 10307.50,
-      status: 'received',
-      paymentMethod: 'Bank Transfer',
-      paymentDate: new Date('2025-01-15'),
-      receivedDate: new Date('2025-01-15'),
-      createdBy: 'user-1',
-      createdAt: new Date('2025-01-10'),
-      updatedAt: new Date('2025-01-15')
-    };
 
-    purchases.push(purchase1);
+        const taxAmount = (subtotal * 8.5) / 100;
+        const total = subtotal + taxAmount;
+
+        const receivedDate = (status === 'received' || status === 'paid')
+          ? new Date(purchaseDate.getTime() + (3 + Math.floor(Math.random() * 7)) * 24 * 60 * 60 * 1000)
+          : undefined;
+
+        purchases.push({
+          id: `purchase-${poCounter}`,
+          companyId: 'company-1',
+          purchaseOrderNumber: `PO-${String(poCounter).padStart(5, '0')}`,
+          vendorId: vendor.id,
+          vendorName: vendor.name,
+          vendorEmail: vendor.email,
+          vendorPhone: vendor.phone,
+          items,
+          subtotal: parseFloat(subtotal.toFixed(2)),
+          taxAmount: parseFloat(taxAmount.toFixed(2)),
+          total: parseFloat(total.toFixed(2)),
+          status,
+          paymentMethod,
+          paymentDate: status === 'paid' ? receivedDate : undefined,
+          receivedDate,
+          createdBy: 'user-1',
+          createdAt: purchaseDate,
+          updatedAt: receivedDate || purchaseDate
+        });
+
+        poCounter++;
+      }
+    }
 
     this.saveToStorage(this.STORAGE_KEYS.purchases, purchases);
   }

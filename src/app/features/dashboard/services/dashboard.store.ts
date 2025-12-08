@@ -24,6 +24,24 @@ export interface DashboardMetrics {
   totalExpenses: number;
   profit: number;
   inventoryAlerts: number;
+  outstandingInvoices: number;
+  pendingOrders: number;
+  activeClients: number;
+  totalProducts: number;
+}
+
+export interface TopCustomer {
+  id: string;
+  name: string;
+  totalRevenue: number;
+  orderCount: number;
+}
+
+export interface TopVendor {
+  id: string;
+  name: string;
+  totalExpenses: number;
+  orderCount: number;
 }
 
 export interface RecentTransaction {
@@ -40,6 +58,10 @@ export interface DashboardState {
   metrics: DashboardMetrics;
   revenueData: ChartData | null;
   expenseData: ChartData | null;
+  salesVsExpensesData: ChartData | null;
+  revenueBreakdownData: ChartData | null;
+  topCustomers: TopCustomer[];
+  topVendors: TopVendor[];
   recentTransactions: RecentTransaction[];
   lowStockItems: InventoryItem[];
   loading: boolean;
@@ -57,6 +79,10 @@ export class DashboardStore extends StoreBase<DashboardState> {
   readonly metrics$ = this.select(state => state.metrics);
   readonly revenueData$ = this.select(state => state.revenueData);
   readonly expenseData$ = this.select(state => state.expenseData);
+  readonly salesVsExpensesData$ = this.select(state => state.salesVsExpensesData);
+  readonly revenueBreakdownData$ = this.select(state => state.revenueBreakdownData);
+  readonly topCustomers$ = this.select(state => state.topCustomers);
+  readonly topVendors$ = this.select(state => state.topVendors);
   readonly recentTransactions$ = this.select(state => state.recentTransactions);
   readonly lowStockItems$ = this.select(state => state.lowStockItems);
   readonly loading$ = this.select(state => state.loading);
@@ -67,6 +93,10 @@ export class DashboardStore extends StoreBase<DashboardState> {
     metrics: state.metrics,
     revenueData: state.revenueData,
     expenseData: state.expenseData,
+    salesVsExpensesData: state.salesVsExpensesData,
+    revenueBreakdownData: state.revenueBreakdownData,
+    topCustomers: state.topCustomers,
+    topVendors: state.topVendors,
     recentTransactions: state.recentTransactions,
     lowStockItems: state.lowStockItems,
     loading: state.loading,
@@ -80,10 +110,18 @@ export class DashboardStore extends StoreBase<DashboardState> {
         totalRevenue: 0,
         totalExpenses: 0,
         profit: 0,
-        inventoryAlerts: 0
+        inventoryAlerts: 0,
+        outstandingInvoices: 0,
+        pendingOrders: 0,
+        activeClients: 0,
+        totalProducts: 0
       },
       revenueData: null,
       expenseData: null,
+      salesVsExpensesData: null,
+      revenueBreakdownData: null,
+      topCustomers: [],
+      topVendors: [],
       recentTransactions: [],
       lowStockItems: [],
       loading: false,
@@ -110,15 +148,23 @@ export class DashboardStore extends StoreBase<DashboardState> {
       sales: this.mockApi.getSales(companyId),
       purchases: this.mockApi.getPurchases(companyId),
       inventory: this.mockApi.getInventory(companyId),
-      alerts: this.mockApi.getInventoryAlerts(companyId)
+      alerts: this.mockApi.getInventoryAlerts(companyId),
+      clients: this.mockApi.getClients(companyId),
+      products: this.mockApi.getProducts(companyId)
     }).pipe(
-      tap(({ sales, purchases, inventory, alerts }) => {
+      tap(({ sales, purchases, inventory, alerts, clients, products }) => {
         // Calculate metrics
-        const metrics = this.calculateMetrics(sales, purchases, alerts.length);
+        const metrics = this.calculateMetrics(sales, purchases, alerts.length, clients.length, products.length);
 
         // Generate chart data
         const revenueData = this.generateRevenueChartData(sales);
         const expenseData = this.generateExpenseChartData(purchases);
+        const salesVsExpensesData = this.generateSalesVsExpensesData(sales, purchases);
+        const revenueBreakdownData = this.generateRevenueBreakdownData(sales);
+
+        // Get top performers
+        const topCustomers = this.getTopCustomers(sales);
+        const topVendors = this.getTopVendors(purchases);
 
         // Get recent transactions
         const recentTransactions = this.getRecentTransactions(sales, purchases);
@@ -132,6 +178,10 @@ export class DashboardStore extends StoreBase<DashboardState> {
           metrics,
           revenueData,
           expenseData,
+          salesVsExpensesData,
+          revenueBreakdownData,
+          topCustomers,
+          topVendors,
           recentTransactions,
           lowStockItems,
           loading: false
@@ -157,10 +207,12 @@ export class DashboardStore extends StoreBase<DashboardState> {
     forkJoin({
       sales: this.mockApi.getSales(companyId),
       purchases: this.mockApi.getPurchases(companyId),
-      alerts: this.mockApi.getInventoryAlerts(companyId)
+      alerts: this.mockApi.getInventoryAlerts(companyId),
+      clients: this.mockApi.getClients(companyId),
+      products: this.mockApi.getProducts(companyId)
     }).pipe(
-      tap(({ sales, purchases, alerts }) => {
-        const metrics = this.calculateMetrics(sales, purchases, alerts.length);
+      tap(({ sales, purchases, alerts, clients, products }) => {
+        const metrics = this.calculateMetrics(sales, purchases, alerts.length, clients.length, products.length);
         this.patchState({ metrics });
       }),
       catchError(error => {
@@ -175,7 +227,9 @@ export class DashboardStore extends StoreBase<DashboardState> {
   private calculateMetrics(
     sales: Sale[],
     purchases: Purchase[],
-    alertCount: number
+    alertCount: number,
+    clientsCount: number,
+    productsCount: number
   ): DashboardMetrics {
     const totalRevenue = sales
       .filter(s => s.status === 'paid')
@@ -187,11 +241,23 @@ export class DashboardStore extends StoreBase<DashboardState> {
 
     const profit = totalRevenue - totalExpenses;
 
+    const outstandingInvoices = sales.filter(s => s.status === 'pending').length;
+    const pendingOrders = purchases.filter(p => p.status === 'ordered').length;
+
+    // Count unique active clients (those with at least one paid sale)
+    const activeClientIds = new Set(
+      sales.filter(s => s.status === 'paid').map(s => s.customerId)
+    );
+
     return {
       totalRevenue,
       totalExpenses,
       profit,
-      inventoryAlerts: alertCount
+      inventoryAlerts: alertCount,
+      outstandingInvoices,
+      pendingOrders,
+      activeClients: activeClientIds.size,
+      totalProducts: productsCount
     };
   }
 
@@ -298,5 +364,108 @@ export class DashboardStore extends StoreBase<DashboardState> {
       labels: last6Months.map(m => m.month),
       values: last6Months.map(m => m.total)
     };
+  }
+
+  private generateSalesVsExpensesData(sales: Sale[], purchases: Purchase[]): ChartData {
+    const salesByMonth = this.groupByMonth(sales.filter(s => s.status === 'paid'), 'createdAt');
+    const expensesByMonth = this.groupByMonth(purchases.filter(p => p.status === 'received' || p.status === 'paid'), 'createdAt');
+
+    return {
+      labels: salesByMonth.labels,
+      datasets: [
+        {
+          label: 'Revenue',
+          data: salesByMonth.values,
+          backgroundColor: 'rgba(255, 122, 89, 0.7)',
+          borderColor: '#FF7A59',
+          borderWidth: 2
+        },
+        {
+          label: 'Expenses',
+          data: expensesByMonth.values,
+          backgroundColor: 'rgba(242, 84, 91, 0.7)',
+          borderColor: '#F2545B',
+          borderWidth: 2
+        }
+      ]
+    };
+  }
+
+  private generateRevenueBreakdownData(sales: Sale[]): ChartData {
+    const paidSales = sales.filter(s => s.status === 'paid');
+    const pendingSales = sales.filter(s => s.status === 'pending');
+    const draftSales = sales.filter(s => s.status === 'draft');
+
+    const paidTotal = paidSales.reduce((sum, s) => sum + s.total, 0);
+    const pendingTotal = pendingSales.reduce((sum, s) => sum + s.total, 0);
+    const draftTotal = draftSales.reduce((sum, s) => sum + s.total, 0);
+
+    return {
+      labels: ['Paid', 'Pending', 'Draft'],
+      datasets: [
+        {
+          label: 'Revenue by Status',
+          data: [paidTotal, pendingTotal, draftTotal],
+          backgroundColor: [
+            '#00A862', // Green for paid
+            '#FFB800', // Yellow for pending
+            '#0091AE'  // Blue for draft
+          ],
+          borderWidth: 0
+        }
+      ]
+    };
+  }
+
+  private getTopCustomers(sales: Sale[]): TopCustomer[] {
+    const customerMap = new Map<string, { name: string, totalRevenue: number, orderCount: number }>();
+
+    sales
+      .filter(s => s.status === 'paid' && s.customerId)
+      .forEach(sale => {
+        const customerId = sale.customerId!; // Safe because we filtered out undefined
+        const existing = customerMap.get(customerId);
+        if (existing) {
+          existing.totalRevenue += sale.total;
+          existing.orderCount += 1;
+        } else {
+          customerMap.set(customerId, {
+            name: sale.customerName,
+            totalRevenue: sale.total,
+            orderCount: 1
+          });
+        }
+      });
+
+    return Array.from(customerMap.entries())
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 5); // Top 5
+  }
+
+  private getTopVendors(purchases: Purchase[]): TopVendor[] {
+    const vendorMap = new Map<string, { name: string, totalExpenses: number, orderCount: number }>();
+
+    purchases
+      .filter(p => (p.status === 'received' || p.status === 'paid') && p.vendorId)
+      .forEach(purchase => {
+        const vendorId = purchase.vendorId!; // Safe because we filtered out undefined
+        const existing = vendorMap.get(vendorId);
+        if (existing) {
+          existing.totalExpenses += purchase.total;
+          existing.orderCount += 1;
+        } else {
+          vendorMap.set(vendorId, {
+            name: purchase.vendorName,
+            totalExpenses: purchase.total,
+            orderCount: 1
+          });
+        }
+      });
+
+    return Array.from(vendorMap.entries())
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.totalExpenses - a.totalExpenses)
+      .slice(0, 5); // Top 5
   }
 }
