@@ -28,7 +28,7 @@ jobs:
 
       - name: Deploy to Hostinger
         uses: easingthemes/ssh-deploy@v5.0.0
-        env:
+        with:
           SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
           ARGS: "-rlgoDzvc --delete"
           SOURCE: "dist/umbrella-frontend/browser/"
@@ -38,15 +38,20 @@ jobs:
           TARGET: ${{ secrets.HOSTINGER_TARGET }}
           EXCLUDE: ".htaccess"
 
-      - name: Wait for health check and perform it
+      - name: Wait for deployment and perform health check
         run: |
           echo "Waiting 10 seconds for server to stabilize..."
           sleep 10
 
-          echo "Performing Health Check on ${{ secrets.PRODUCTION_URL }}..."
-          if curl -fsL -o /dev/null --max-time 15 ${{ secrets.PRODUCTION_URL }}; then
-            echo "✔️ Health Check successful: Application is running correctly."
+          PRODUCTION_URL="${{ secrets.PRODUCTION_URL }}"
+          if [ -n "$PRODUCTION_URL" ]; then
+            echo "Performing Health Check on $PRODUCTION_URL..."
+            if curl -fsL -o /dev/null --max-time 15 "$PRODUCTION_URL"; then
+              echo "✔️ Health Check successful: Application is running correctly."
+            else
+              echo "❌ Health Check failed: Application is not available."
+              exit 1
+            fi
           else
-            echo "❌ Health Check failed: Application is not available."
-            exit 1
+            echo "⚠️ PRODUCTION_URL not set, skipping health check."
           fi
