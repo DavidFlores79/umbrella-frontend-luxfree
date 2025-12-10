@@ -1409,37 +1409,37 @@ export class MockApiService {
       { sku: 'SOLAR-PANEL-400', name: 'Panel Solar Monocristalino 400W', category: 'solar', price: 3650.00, cost: 2550.00 },
       { sku: 'SOLAR-PANEL-450', name: 'Panel Solar Bifacial 450W', category: 'solar', price: 4250.00, cost: 2950.00 },
       { sku: 'SOLAR-PANEL-550', name: 'Panel Solar Alta Eficiencia 550W', category: 'solar', price: 5450.00, cost: 3850.00 },
-      
+
       // Inverters
       { sku: 'INV-MICRO-1000', name: 'Microinversor 1000W', category: 'solar', price: 3250.00, cost: 2150.00 },
       { sku: 'INV-STRING-5K', name: 'Inversor String 5kW Monofásico', category: 'solar', price: 18500.00, cost: 13500.00 },
       { sku: 'INV-STRING-10K', name: 'Inversor String 10kW Trifásico', category: 'solar', price: 32500.00, cost: 24000.00 },
       { sku: 'INV-HYBRID-5K', name: 'Inversor Híbrido 5kW con Batería', category: 'solar', price: 45500.00, cost: 34000.00 },
       { sku: 'INV-HYBRID-10K', name: 'Inversor Híbrido 10kW con Batería', category: 'solar', price: 68500.00, cost: 52000.00 },
-      
+
       // Mounting & Structure
       { sku: 'MOUNT-ROOF-TILE', name: 'Estructura Montaje Teja (10 paneles)', category: 'solar', price: 4850.00, cost: 3250.00 },
       { sku: 'MOUNT-ROOF-METAL', name: 'Estructura Montaje Lámina (10 paneles)', category: 'solar', price: 3950.00, cost: 2650.00 },
       { sku: 'MOUNT-GROUND', name: 'Estructura Montaje Piso (10 paneles)', category: 'solar', price: 6850.00, cost: 4650.00 },
       { sku: 'MOUNT-TRACKER', name: 'Seguidor Solar 1 Eje (20 paneles)', category: 'solar', price: 45500.00, cost: 32000.00 },
-      
+
       // Batteries & Storage
       { sku: 'BATT-LIFEPO4-5KWH', name: 'Batería LiFePO4 5kWh 48V', category: 'solar', price: 32500.00, cost: 24500.00 },
       { sku: 'BATT-LIFEPO4-10KWH', name: 'Batería LiFePO4 10kWh 48V', category: 'solar', price: 58500.00, cost: 44500.00 },
       { sku: 'BATT-LIFEPO4-15KWH', name: 'Batería LiFePO4 15kWh 48V', category: 'solar', price: 82500.00, cost: 64000.00 },
-      
+
       // Cables & Connectors
       { sku: 'CABLE-SOLAR-6MM-100M', name: 'Cable Solar 6mm² (100m)', category: 'supplies', price: 3250.00, cost: 2150.00 },
       { sku: 'CABLE-SOLAR-4MM-100M', name: 'Cable Solar 4mm² (100m)', category: 'supplies', price: 2450.00, cost: 1650.00 },
       { sku: 'MC4-CONNECTOR-PAIR', name: 'Conectores MC4 (10 pares)', category: 'supplies', price: 285.00, cost: 185.00 },
       { sku: 'JUNCTION-BOX', name: 'Caja de Conexiones String Box 2 in 1 out', category: 'supplies', price: 1850.00, cost: 1250.00 },
-      
+
       // Residential Street Lighting
       { sku: 'LIGHT-LED-30W-SOLAR', name: 'Luminaria LED Solar 30W con Poste 4m', category: 'lighting', price: 8850.00, cost: 6250.00 },
       { sku: 'LIGHT-LED-50W-SOLAR', name: 'Luminaria LED Solar 50W con Poste 5m', category: 'lighting', price: 12500.00, cost: 8850.00 },
       { sku: 'LIGHT-LED-60W-SOLAR', name: 'Luminaria LED Solar 60W con Poste 6m', category: 'lighting', price: 15850.00, cost: 11250.00 },
       { sku: 'LIGHT-LED-100W-SOLAR', name: 'Luminaria LED Solar 100W con Poste 7m', category: 'lighting', price: 22500.00, cost: 16850.00 },
-      
+
       // Public Street Lighting
       { sku: 'LIGHT-LED-150W-SOLAR-PUB', name: 'Luminaria Pública LED Solar 150W Poste 8m', category: 'lighting', price: 32500.00, cost: 24500.00 },
       { sku: 'LIGHT-LED-200W-SOLAR-PUB', name: 'Luminaria Pública LED Solar 200W Poste 10m', category: 'lighting', price: 42500.00, cost: 32000.00 },
@@ -1448,7 +1448,7 @@ export class MockApiService {
       { sku: 'POLE-GALV-8M', name: 'Poste Galvanizado 8m para Luminaria', category: 'lighting', price: 5250.00, cost: 3850.00 },
       { sku: 'POLE-GALV-10M', name: 'Poste Galvanizado 10m para Luminaria', category: 'lighting', price: 7850.00, cost: 5650.00 },
       { sku: 'POLE-GALV-12M', name: 'Poste Galvanizado 12m para Luminaria', category: 'lighting', price: 10850.00, cost: 7850.00 },
-      
+
       // Installation Services
       { sku: 'SERV-INSTALL-RES-3KW', name: 'Instalación Sistema Solar Residencial hasta 3kW', category: 'services', price: 8500.00, cost: 0.00 },
       { sku: 'SERV-INSTALL-RES-5KW', name: 'Instalación Sistema Solar Residencial hasta 5kW', category: 'services', price: 12500.00, cost: 0.00 },
@@ -1456,12 +1456,12 @@ export class MockApiService {
       { sku: 'SERV-INSTALL-COM-20KW', name: 'Instalación Sistema Solar Comercial hasta 20kW', category: 'services', price: 32500.00, cost: 0.00 },
       { sku: 'SERV-INSTALL-LIGHT-RES', name: 'Instalación Luminaria Residencial (por unidad)', category: 'services', price: 2500.00, cost: 0.00 },
       { sku: 'SERV-INSTALL-LIGHT-PUB', name: 'Instalación Luminaria Pública (por unidad)', category: 'services', price: 4500.00, cost: 0.00 },
-      
+
       // Maintenance Services
       { sku: 'SERV-MAINT-SOLAR-BASIC', name: 'Mantenimiento Preventivo Sistema Solar (Básico)', category: 'services', price: 1850.00, cost: 0.00 },
       { sku: 'SERV-MAINT-SOLAR-COMP', name: 'Mantenimiento Preventivo Sistema Solar (Completo)', category: 'services', price: 3850.00, cost: 0.00 },
       { sku: 'SERV-MAINT-LIGHT', name: 'Mantenimiento Luminarias (por unidad)', category: 'services', price: 850.00, cost: 0.00 },
-      
+
       // Engineering & Consulting
       { sku: 'SERV-DESIGN-RES', name: 'Proyecto y Diseño Sistema Solar Residencial', category: 'services', price: 5500.00, cost: 0.00 },
       { sku: 'SERV-DESIGN-COM', name: 'Proyecto y Diseño Sistema Solar Comercial/Industrial', category: 'services', price: 15500.00, cost: 0.00 },
