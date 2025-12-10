@@ -1599,23 +1599,36 @@ export class MockApiService {
   private seedSales(): void {
     const sales: Sale[] = [];
     const clients = [
-      { id: 'client-1', name: 'ABC Corporation', email: 'contact@abc-corp.com', phone: '+1 (555) 200-0001' },
-      { id: 'client-2', name: 'XYZ Industries', email: 'sales@xyz-ind.com', phone: '+1 (555) 200-0002' },
-      { id: 'client-3', name: 'Tech Startup LLC', email: 'info@techstartup.com', phone: '+1 (555) 200-0003' },
-      { id: 'client-4', name: 'Enterprise Solutions', email: 'contact@entsol.com', phone: '+1 (555) 200-0004' },
-      { id: 'client-5', name: 'Digital Agency', email: 'hello@digitalagency.com', phone: '+1 (555) 200-0005' }
+      { id: 'client-1', name: 'Residencial Las Américas', email: 'administracion@lasamericas.mx', phone: '+52 (999) 200-0001' },
+      { id: 'client-2', name: 'Gobierno Municipal de Umán', email: 'obras.publicas@uman.gob.mx', phone: '+52 (999) 200-0002' },
+      { id: 'client-3', name: 'Hotel Hacienda Xcanatún', email: 'mantenimiento@xcanatun.com', phone: '+52 (999) 200-0003' },
+      { id: 'client-4', name: 'Industrias del Sureste S.A. de C.V.', email: 'compras@indusureste.com', phone: '+52 (999) 200-0004' },
+      { id: 'client-5', name: 'Familia Pérez García', email: 'carlos.perez@email.com', phone: '+52 (999) 200-0005' },
+      { id: 'client-6', name: 'Plaza Comercial La Isla', email: 'gerencia@plazalaisla.com', phone: '+52 (999) 200-0006' },
+      { id: 'client-7', name: 'Universidad Tecnológica Metropolitana', email: 'infraestructura@utm.edu.mx', phone: '+52 (999) 200-0007' },
+      { id: 'client-8', name: 'Súper Farmacia del Mayab', email: 'operaciones@farmayab.com', phone: '+52 (999) 200-0008' }
     ];
 
     const products = [
-      { id: 'product-tech-1', name: 'Dell XPS 15 Laptop', sku: 'LAPTOP-001', price: 1299.99 },
-      { id: 'product-tech-2', name: 'HP Monitor 27"', sku: 'MONITOR-001', price: 349.99 },
-      { id: 'product-tech-3', name: 'Logitech MX Master 3', sku: 'MOUSE-001', price: 99.99 },
-      { id: 'product-tech-4', name: 'Dell Docking Station', sku: 'DOCK-001', price: 249.99 },
-      { id: 'product-tech-5', name: 'Webcam HD Pro', sku: 'WEBCAM-001', price: 129.99 }
+      { id: 'product-luxfree-1', name: 'Panel Solar Monocristalino 300W', sku: 'SOLAR-PANEL-300', price: 2850.00 },
+      { id: 'product-luxfree-2', name: 'Panel Solar Monocristalino 400W', sku: 'SOLAR-PANEL-400', price: 3650.00 },
+      { id: 'product-luxfree-6', name: 'Inversor String 5kW Monofásico', sku: 'INV-STRING-5K', price: 18500.00 },
+      { id: 'product-luxfree-7', name: 'Inversor String 10kW Trifásico', sku: 'INV-STRING-10K', price: 32500.00 },
+      { id: 'product-luxfree-10', name: 'Estructura Montaje Teja (10 paneles)', sku: 'MOUNT-ROOF-TILE', price: 4850.00 },
+      { id: 'product-luxfree-11', name: 'Estructura Montaje Lámina (10 paneles)', sku: 'MOUNT-ROOF-METAL', price: 3950.00 },
+      { id: 'product-luxfree-14', name: 'Batería LiFePO4 5kWh 48V', sku: 'BATT-LIFEPO4-5KWH', price: 32500.00 },
+      { id: 'product-luxfree-15', name: 'Batería LiFePO4 10kWh 48V', sku: 'BATT-LIFEPO4-10KWH', price: 58500.00 },
+      { id: 'product-luxfree-21', name: 'Luminaria LED Solar 30W con Poste 4m', sku: 'LIGHT-LED-30W-SOLAR', price: 8850.00 },
+      { id: 'product-luxfree-22', name: 'Luminaria LED Solar 50W con Poste 5m', sku: 'LIGHT-LED-50W-SOLAR', price: 12500.00 },
+      { id: 'product-luxfree-25', name: 'Luminaria Pública LED Solar 150W Poste 8m', sku: 'LIGHT-LED-150W-SOLAR-PUB', price: 32500.00 },
+      { id: 'product-luxfree-32', name: 'Instalación Sistema Solar Residencial hasta 3kW', sku: 'SERV-INSTALL-RES-3KW', price: 8500.00 },
+      { id: 'product-luxfree-33', name: 'Instalación Sistema Solar Residencial hasta 5kW', sku: 'SERV-INSTALL-RES-5KW', price: 12500.00 },
+      { id: 'product-luxfree-35', name: 'Instalación Luminaria Residencial (por unidad)', sku: 'SERV-INSTALL-LIGHT-RES', price: 2500.00 },
+      { id: 'product-luxfree-36', name: 'Instalación Luminaria Pública (por unidad)', sku: 'SERV-INSTALL-LIGHT-PUB', price: 4500.00 }
     ];
 
     const statuses: Array<'paid' | 'pending' | 'draft'> = ['paid', 'paid', 'paid', 'paid', 'pending', 'draft'];
-    const paymentMethods = ['Credit Card', 'Bank Transfer', 'PayPal', 'Cash'];
+    const paymentMethods = ['Transferencia Bancaria', 'Tarjeta de Crédito', 'Efectivo', 'Cheque'];
 
     let invoiceCounter = 1;
     const now = new Date();
@@ -1642,7 +1655,7 @@ export class MockApiService {
           const quantity = 1 + Math.floor(Math.random() * 5);
           const unitPrice = product.price;
           const itemSubtotal = quantity * unitPrice;
-          const taxRate = 8.5;
+          const taxRate = 16.0;
           const taxAmount = (itemSubtotal * taxRate) / 100;
           const total = itemSubtotal + taxAmount;
 
@@ -1662,7 +1675,7 @@ export class MockApiService {
           subtotal += itemSubtotal;
         }
 
-        const taxAmount = (subtotal * 8.5) / 100;
+        const taxAmount = (subtotal * 16.0) / 100;
         const total = subtotal + taxAmount;
 
         sales.push({
@@ -1695,22 +1708,33 @@ export class MockApiService {
   private seedPurchases(): void {
     const purchases: Purchase[] = [];
     const vendors = [
-      { id: 'vendor-1', name: 'Tech Distributor Inc.', email: 'sales@techdist.com', phone: '+1 (555) 300-0001' },
-      { id: 'vendor-2', name: 'Office Supplies Plus', email: 'orders@officesupplies.com', phone: '+1 (555) 300-0002' },
-      { id: 'vendor-3', name: 'Global Electronics', email: 'contact@globalelec.com', phone: '+1 (555) 300-0003' }
+      { id: 'vendor-1', name: 'JA Solar México S. de R.L.', email: 'ventas@jasolar.com.mx', phone: '+52 (55) 5300-0001' },
+      { id: 'vendor-2', name: 'Growatt Inversores México', email: 'info@growatt.mx', phone: '+52 (55) 5300-0002' },
+      { id: 'vendor-3', name: 'BYD Energy Storage México', email: 'comercial@bydenergy.mx', phone: '+52 (55) 5300-0003' },
+      { id: 'vendor-4', name: 'Estructuras Solares del Sureste', email: 'ventas@estructurassolar.com', phone: '+52 (999) 300-0001' },
+      { id: 'vendor-5', name: 'Iluminación LED Yucatán', email: 'proyectos@ledyucatan.com', phone: '+52 (999) 300-0002' },
+      { id: 'vendor-6', name: 'Postes y Herrajes del Golfo', email: 'ventas@postesgolfo.com', phone: '+52 (999) 300-0003' }
     ];
 
     const products = [
-      { id: 'product-tech-1', name: 'Dell XPS 15 Laptop', sku: 'LAPTOP-001', cost: 950.00 },
-      { id: 'product-tech-2', name: 'HP Monitor 27"', sku: 'MONITOR-001', cost: 220.00 },
-      { id: 'product-tech-3', name: 'Logitech MX Master 3', sku: 'MOUSE-001', cost: 65.00 },
-      { id: 'product-tech-4', name: 'Dell Docking Station', sku: 'DOCK-001', cost: 180.00 },
-      { id: 'product-tech-5', name: 'Webcam HD Pro', sku: 'WEBCAM-001', cost: 85.00 }
+      { id: 'product-luxfree-1', name: 'Panel Solar Monocristalino 300W', sku: 'SOLAR-PANEL-300', cost: 1950.00 },
+      { id: 'product-luxfree-2', name: 'Panel Solar Monocristalino 400W', sku: 'SOLAR-PANEL-400', cost: 2550.00 },
+      { id: 'product-luxfree-6', name: 'Inversor String 5kW Monofásico', sku: 'INV-STRING-5K', cost: 13500.00 },
+      { id: 'product-luxfree-7', name: 'Inversor String 10kW Trifásico', sku: 'INV-STRING-10K', cost: 24000.00 },
+      { id: 'product-luxfree-10', name: 'Estructura Montaje Teja (10 paneles)', sku: 'MOUNT-ROOF-TILE', cost: 3250.00 },
+      { id: 'product-luxfree-14', name: 'Batería LiFePO4 5kWh 48V', sku: 'BATT-LIFEPO4-5KWH', cost: 24500.00 },
+      { id: 'product-luxfree-15', name: 'Batería LiFePO4 10kWh 48V', sku: 'BATT-LIFEPO4-10KWH', cost: 44500.00 },
+      { id: 'product-luxfree-17', name: 'Cable Solar 6mm² (100m)', sku: 'CABLE-SOLAR-6MM-100M', cost: 2150.00 },
+      { id: 'product-luxfree-18', name: 'Cable Solar 4mm² (100m)', sku: 'CABLE-SOLAR-4MM-100M', cost: 1650.00 },
+      { id: 'product-luxfree-21', name: 'Luminaria LED Solar 30W con Poste 4m', sku: 'LIGHT-LED-30W-SOLAR', cost: 6250.00 },
+      { id: 'product-luxfree-25', name: 'Luminaria Pública LED Solar 150W Poste 8m', sku: 'LIGHT-LED-150W-SOLAR-PUB', cost: 24500.00 },
+      { id: 'product-luxfree-28', name: 'Poste Galvanizado 6m para Luminaria', sku: 'POLE-GALV-6M', cost: 2650.00 },
+      { id: 'product-luxfree-29', name: 'Poste Galvanizado 8m para Luminaria', sku: 'POLE-GALV-8M', cost: 3850.00 }
     ];
 
     const statuses: Array<'draft' | 'ordered' | 'received' | 'paid' | 'cancelled'> =
       ['received', 'received', 'paid', 'paid', 'ordered', 'draft'];
-    const paymentMethods = ['Bank Transfer', 'Credit Card', 'Wire Transfer', 'Check'];
+    const paymentMethods = ['Transferencia Bancaria', 'Tarjeta de Crédito', 'Transferencia Internacional', 'Cheque'];
 
     let poCounter = 1;
     const now = new Date();
@@ -1737,7 +1761,7 @@ export class MockApiService {
           const quantity = 5 + Math.floor(Math.random() * 15); // 5-20 units
           const unitCost = product.cost;
           const itemSubtotal = quantity * unitCost;
-          const taxRate = 8.5;
+          const taxRate = 16.0;
           const taxAmount = (itemSubtotal * taxRate) / 100;
           const total = itemSubtotal + taxAmount;
 
@@ -1757,7 +1781,7 @@ export class MockApiService {
           subtotal += itemSubtotal;
         }
 
-        const taxAmount = (subtotal * 8.5) / 100;
+        const taxAmount = (subtotal * 16.0) / 100;
         const total = subtotal + taxAmount;
 
         const receivedDate = (status === 'received' || status === 'paid')
