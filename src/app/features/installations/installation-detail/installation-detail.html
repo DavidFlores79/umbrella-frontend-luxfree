@@ -1,0 +1,239 @@
+<div class="p-6">
+  @if (loading$ | async) {
+    <div class="text-center py-12">
+      <p class="text-text-light">Loading installation...</p>
+    </div>
+  }
+
+  @else if (installation$ | async; as installation) {
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-start">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <button
+            (click)="onBackToList()"
+            class="text-primary hover:underline text-sm"
+          >
+            ← Back to Installations
+          </button>
+        </div>
+        <h1 class="text-2xl font-bold text-text">{{ installation.title }}</h1>
+        <p class="text-sm text-text-light mt-1">{{ installation.projectNumber }}</p>
+      </div>
+      <span class="px-3 py-1 rounded-full text-sm font-medium" [class]="getStatusColor(installation.status)">
+        {{ installation.status | titlecase }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column: Project Details -->
+      <div class="lg:col-span-1">
+        <app-card>
+          <h2 class="text-lg font-semibold mb-4">Project Details</h2>
+
+          <div class="space-y-3">
+            <div>
+              <p class="text-xs text-text-light">Customer</p>
+              <p class="font-medium">{{ installation.customerName }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs text-text-light">Project Type</p>
+              <p class="font-medium capitalize">{{ installation.projectType.replace('_', ' ') }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs text-text-light">Location</p>
+              <p class="text-sm">{{ installation.location.address }}</p>
+              <p class="text-sm">{{ installation.location.city }}, {{ installation.location.state }} {{ installation.location.zipCode }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs text-text-light">Scheduled</p>
+              <p class="font-medium">{{ formatDate(installation.scheduledDate) }}</p>
+            </div>
+
+            @if (installation.startedAt) {
+              <div>
+                <p class="text-xs text-text-light">Started</p>
+                <p class="font-medium">{{ formatDate(installation.startedAt) }}</p>
+              </div>
+            }
+
+            @if (installation.completedAt) {
+              <div>
+                <p class="text-xs text-text-light">Completed</p>
+                <p class="font-medium">{{ formatDate(installation.completedAt) }}</p>
+              </div>
+            }
+
+            @if (installation.description) {
+              <div>
+                <p class="text-xs text-text-light">Description</p>
+                <p class="text-sm">{{ installation.description }}</p>
+              </div>
+            }
+          </div>
+        </app-card>
+
+        <!-- Quick Stats -->
+        <app-card class="mt-4">
+          <h3 class="text-sm font-semibold mb-3">Progress</h3>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-text-light">Total Events</span>
+              <span class="font-bold">{{ installation.events.length }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-text-light">Total Photos</span>
+              <span class="font-bold">{{ getTotalPhotos(installation.events) }}</span>
+            </div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Right Column: Events Timeline -->
+      <div class="lg:col-span-2">
+        <!-- Add Event Button -->
+        <div class="mb-4">
+          <app-button (click)="onToggleEventForm()">
+            {{ showEventForm ? 'Cancel' : '+ Log New Event' }}
+          </app-button>
+        </div>
+
+        <!-- Event Form -->
+        @if (showEventForm) {
+          <app-card class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Log Installation Event</h3>
+            <form [formGroup]="eventForm" (ngSubmit)="onSubmitEvent()">
+              <div class="space-y-4">
+                <app-form-select
+                  formControlName="eventType"
+                  label="Event Type"
+                  [options]="eventTypeOptions"
+                  [required]="true"
+                ></app-form-select>
+
+                <app-form-input
+                  formControlName="title"
+                  label="Event Title"
+                  placeholder="e.g., Panel Mounting Completed"
+                  [required]="true"
+                ></app-form-input>
+
+                <app-form-input
+                  formControlName="description"
+                  label="Description"
+                  placeholder="Describe what was accomplished..."
+                  [required]="true"
+                ></app-form-input>
+
+                <app-form-select
+                  formControlName="status"
+                  label="Status"
+                  [options]="eventStatusOptions"
+                  [required]="true"
+                ></app-form-select>
+
+                <!-- Event Photos -->
+                <div>
+                  <app-image-upload
+                    [images]="eventPhotos"
+                    [maxFiles]="10"
+                    [maxFileSize]="5242880"
+                    [label]="'Event Photos'"
+                    (imagesChange)="onEventPhotosChange($event)"
+                    (error)="onImageError($event)"
+                  ></app-image-upload>
+
+                  @if (uploadError) {
+                    <p class="text-red-500 text-sm mt-2">{{ uploadError }}</p>
+                  }
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-2">
+                  <app-button type="submit" variant="primary">
+                    Save Event
+                  </app-button>
+                  <app-button type="button" variant="secondary" (click)="onToggleEventForm()">
+                    Cancel
+                  </app-button>
+                </div>
+              </div>
+            </form>
+          </app-card>
+        }
+
+        <!-- Events Timeline -->
+        <div class="space-y-4">
+          <h2 class="text-lg font-semibold">Event Timeline</h2>
+
+          @if (installation.events.length === 0) {
+            <app-card>
+              <div class="text-center py-8">
+                <p class="text-text-light">No events logged yet.</p>
+                <p class="text-sm text-text-light mt-1">Click "Log New Event" to start documenting this installation.</p>
+              </div>
+            </app-card>
+          }
+
+          @for (event of installation.events; track event.id) {
+            <app-card>
+              <!-- Event Header -->
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h3 class="font-semibold">{{ event.title }}</h3>
+                  <p class="text-sm text-text-light">{{ formatDateTime(event.timestamp) }}</p>
+                  <p class="text-xs text-text-light">by {{ event.performedBy }}</p>
+                </div>
+                <span
+                  class="px-2 py-1 rounded text-xs font-medium"
+                  [class]="getEventStatusBadge(event.status)"
+                >
+                  {{ event.status | titlecase }}
+                </span>
+              </div>
+
+              <!-- Event Description -->
+              <p class="text-sm mb-3">{{ event.description }}</p>
+
+              <!-- Measurements (if any) -->
+              @if (event.measurements) {
+                <div class="bg-gray-50 dark:bg-gray-800 rounded p-3 mb-3">
+                  <p class="text-xs font-semibold text-text-light mb-2">Measurements</p>
+                  <div class="grid grid-cols-2 gap-2">
+                    @for (item of event.measurements | keyvalue; track item.key) {
+                      <div>
+                        <span class="text-xs text-text-light">{{ item.key }}:</span>
+                        <span class="text-sm font-medium ml-1">{{ item.value }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Event Photos -->
+              @if (event.photos.length > 0) {
+                <div>
+                  <p class="text-sm font-medium mb-2">Photos ({{ event.photos.length }})</p>
+                  <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    @for (photo of event.photos; track photo.id) {
+                      <div class="aspect-square rounded overflow-hidden border border-gray-200">
+                        <img
+                          [src]="photo.url"
+                          [alt]="photo.caption || photo.filename"
+                          class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition"
+                        />
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </app-card>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

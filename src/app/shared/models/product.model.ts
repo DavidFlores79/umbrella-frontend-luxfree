@@ -13,7 +13,8 @@ export interface Product {
   cost: number;
   taxRate: number;
   unit: string; // e.g., 'piece', 'kg', 'hour', 'meter'
-  image?: string;
+  image?: string; // Primary image URL or base64
+  images?: string[]; // Additional images (URLs or base64)
   isActive: boolean;
   trackInventory: boolean;
   createdAt: Date;

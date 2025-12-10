@@ -1,0 +1,121 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-text">Installation Projects</h1>
+      <p class="mt-1 text-sm text-text-light">
+        Track solar, street lighting, and other installation projects
+      </p>
+    </div>
+    <app-button (click)="onCreateNew()">
+      Create Installation
+    </app-button>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="mb-6 flex gap-2 flex-wrap">
+    <button
+      (click)="onFilterChange('all')"
+      [class.bg-primary]="selectedFilter === 'all'"
+      [class.text-white]="selectedFilter === 'all'"
+      [class.bg-gray-200]="selectedFilter !== 'all'"
+      class="px-4 py-2 rounded-lg text-sm font-medium hover:opacity-80 transition"
+    >
+      All Projects
+    </button>
+    <button
+      (click)="onFilterChange('solar_installation')"
+      [class.bg-primary]="selectedFilter === 'solar_installation'"
+      [class.text-white]="selectedFilter === 'solar_installation'"
+      [class.bg-gray-200]="selectedFilter !== 'solar_installation'"
+      class="px-4 py-2 rounded-lg text-sm font-medium hover:opacity-80 transition"
+    >
+      ☀️ Solar Installations
+    </button>
+    <button
+      (click)="onFilterChange('street_lighting')"
+      [class.bg-primary]="selectedFilter === 'street_lighting'"
+      [class.text-white]="selectedFilter === 'street_lighting'"
+      [class.bg-gray-200]="selectedFilter !== 'street_lighting'"
+      class="px-4 py-2 rounded-lg text-sm font-medium hover:opacity-80 transition"
+    >
+      💡 Street Lighting
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading$ | async) {
+    <div class="text-center py-12">
+      <p class="text-text-light">Loading installations...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @else if ((filteredInstallations$ | async)?.length === 0) {
+    <app-card>
+      <div class="text-center py-12">
+        <p class="text-text-light mb-4">No installations found.</p>
+        <app-button (click)="onCreateNew()">
+          Create First Installation
+        </app-button>
+      </div>
+    </app-card>
+  }
+
+  <!-- Installation Grid -->
+  @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (installation of filteredInstallations$ | async; track installation.id) {
+        <app-card>
+          <div class="cursor-pointer" (click)="onViewDetails(installation.id)">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">{{ getProjectTypeIcon(installation.projectType) }}</span>
+                <div>
+                  <p class="text-xs text-gray-500">{{ installation.projectNumber }}</p>
+                  <h3 class="font-semibold text-text">{{ installation.title }}</h3>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer -->
+            <p class="text-sm text-text-light mb-2">
+              <span class="font-medium">Customer:</span> {{ installation.customerName }}
+            </p>
+
+            <!-- Status -->
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-medium" [class]="getStatusColor(installation.status)">
+                ● {{ installation.status | titlecase }}
+              </span>
+            </div>
+
+            <!-- Location -->
+            <p class="text-sm text-text-light mb-2 truncate">
+              📍 {{ installation.location.address }}, {{ installation.location.city }}
+            </p>
+
+            <!-- Schedule -->
+            <p class="text-sm text-text-light mb-3">
+              <span class="font-medium">Scheduled:</span> {{ formatDate(installation.scheduledDate) }}
+            </p>
+
+            <!-- Events Count -->
+            <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+              <p class="text-xs text-text-light">
+                {{ installation.events.length }} event(s) logged
+              </p>
+              <button
+                (click)="onViewDetails(installation.id); $event.stopPropagation()"
+                class="text-primary text-sm hover:underline"
+              >
+                View Details →
+              </button>
+            </div>
+          </div>
+        </app-card>
+      }
+    </div>
+  }
+</div>

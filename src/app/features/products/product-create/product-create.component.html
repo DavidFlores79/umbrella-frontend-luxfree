@@ -152,6 +152,27 @@
           </div>
         </div>
 
+        <!-- Product Images -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-text mb-4">Product Images</h3>
+          <app-image-upload
+            [images]="productImages"
+            [maxFiles]="5"
+            [maxFileSize]="5242880"
+            [label]="'Product Images'"
+            (imagesChange)="onImagesChange($event)"
+            (error)="onImageError($event)"
+          ></app-image-upload>
+
+          @if (uploadError) {
+            <p class="text-red-500 text-sm mt-2">{{ uploadError }}</p>
+          }
+
+          <p class="text-gray-500 text-xs mt-2">
+            First image will be used as the primary product image. Maximum 5 images, 5MB each.
+          </p>
+        </div>
+
         <!-- Action Buttons -->
         <div class="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
           <app-button

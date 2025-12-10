@@ -9,6 +9,7 @@ import { Button } from '../../../shared/components/ui/button/button';
 import { FormInput } from '../../../shared/components/ui/forms/form-input/form-input';
 import { FormSelect } from '../../../shared/components/ui/forms/form-select/form-select';
 import { Alert } from '../../../shared/components/ui/alert/alert';
+import { ImageUploadComponent } from '../../../shared/components/ui/image-upload/image-upload.component';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -21,7 +22,8 @@ import { map } from 'rxjs/operators';
     Button,
     FormInput,
     FormSelect,
-    Alert
+    Alert,
+    ImageUploadComponent
   ],
   templateUrl: './product-create.component.html'
 })
@@ -43,6 +45,10 @@ export class ProductCreateComponent implements OnInit {
   productId: string | null = null;
   form!: FormGroup;
   submitted = false;
+
+  // Image upload properties
+  productImages: string[] = [];
+  uploadError = '';
 
   readonly categoryOptions = [
     { value: 'electronics', label: 'Electronics' },
@@ -125,6 +131,15 @@ export class ProductCreateComponent implements OnInit {
           trackInventory: product.trackInventory,
           isActive: product.isActive.toString()
         });
+
+        // Load existing images
+        this.productImages = [];
+        if (product.image) {
+          this.productImages.push(product.image);
+        }
+        if (product.images && product.images.length > 0) {
+          this.productImages.push(...product.images);
+        }
       }
     });
   }
@@ -154,7 +169,10 @@ export class ProductCreateComponent implements OnInit {
       taxRate: parseFloat(formValue.taxRate) || 0,
       unit: formValue.unit,
       trackInventory: formValue.trackInventory,
-      isActive: formValue.isActive === 'true' || formValue.isActive === true
+      isActive: formValue.isActive === 'true' || formValue.isActive === true,
+      // Include images
+      image: this.productImages[0] || undefined,
+      images: this.productImages.length > 1 ? this.productImages.slice(1) : undefined
     };
 
     if (this.isEditMode && this.productId) {
@@ -177,6 +195,15 @@ export class ProductCreateComponent implements OnInit {
 
   dismissError(): void {
     this.store.clearError();
+  }
+
+  onImagesChange(images: string[]): void {
+    this.productImages = images;
+    this.uploadError = '';
+  }
+
+  onImageError(error: string): void {
+    this.uploadError = error;
   }
 
   isFieldInvalid(fieldName: string): boolean {

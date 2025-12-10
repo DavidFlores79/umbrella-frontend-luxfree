@@ -1,0 +1,135 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-text">Create Installation Project</h1>
+    <p class="mt-1 text-sm text-text-light">
+      Schedule a new solar, street lighting, or other installation project
+    </p>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error$ | async; as error) {
+    <app-alert
+      type="error"
+      [dismissible]="true"
+      (dismissed)="dismissError()"
+      class="mb-6"
+    >
+      {{ error }}
+    </app-alert>
+  }
+
+  <!-- Form -->
+  <app-card>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="space-y-6">
+        <!-- Project Information -->
+        <div>
+          <h3 class="text-lg font-medium text-text mb-4">Project Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-form-select
+              class="md:col-span-2"
+              formControlName="customerId"
+              label="Customer"
+              [options]="(clientOptions$ | async) || []"
+              [required]="true"
+              [errorMessage]="getFieldError('customerId')"
+            ></app-form-select>
+
+            <app-form-input
+              class="md:col-span-2"
+              formControlName="title"
+              label="Project Title"
+              placeholder="e.g., 5kW Residential Solar Installation"
+              [required]="true"
+              [errorMessage]="getFieldError('title')"
+            ></app-form-input>
+
+            <app-form-select
+              formControlName="projectType"
+              label="Project Type"
+              [options]="projectTypeOptions"
+              [required]="true"
+              [errorMessage]="getFieldError('projectType')"
+            ></app-form-select>
+
+            <app-form-input
+              formControlName="scheduledDate"
+              label="Scheduled Date"
+              placeholder="YYYY-MM-DD"
+              [required]="true"
+              [errorMessage]="getFieldError('scheduledDate')"
+            ></app-form-input>
+
+            <app-form-input
+              class="md:col-span-2"
+              formControlName="description"
+              label="Description"
+              placeholder="Brief description of the project"
+              [errorMessage]="getFieldError('description')"
+            ></app-form-input>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-medium text-text mb-4">Installation Location</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <app-form-input
+              class="md:col-span-2"
+              formControlName="address"
+              label="Street Address"
+              placeholder="123 Main Street"
+              [required]="true"
+              [errorMessage]="getFieldError('address')"
+            ></app-form-input>
+
+            <app-form-input
+              formControlName="city"
+              label="City"
+              placeholder="Austin"
+              [required]="true"
+              [errorMessage]="getFieldError('city')"
+            ></app-form-input>
+
+            <app-form-input
+              formControlName="state"
+              label="State"
+              placeholder="TX"
+              [required]="true"
+              [errorMessage]="getFieldError('state')"
+            ></app-form-input>
+
+            <app-form-input
+              formControlName="zipCode"
+              label="ZIP Code"
+              placeholder="78701"
+              [required]="true"
+              [errorMessage]="getFieldError('zipCode')"
+            ></app-form-input>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <app-button
+            type="submit"
+            variant="primary"
+            [loading]="(loading$ | async) || false"
+            [disabled]="(loading$ | async) || false"
+          >
+            Create Installation
+          </app-button>
+          <app-button
+            type="button"
+            variant="secondary"
+            (click)="onCancel()"
+            [disabled]="(loading$ | async) || false"
+          >
+            Cancel
+          </app-button>
+        </div>
+      </div>
+    </form>
+  </app-card>
+</div>

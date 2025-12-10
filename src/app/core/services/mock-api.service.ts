@@ -50,6 +50,14 @@ import {
   CreateClientDto,
   UpdateClientDto
 } from '../../shared/models/client.model';
+import {
+  Installation,
+  CreateInstallationDto,
+  UpdateInstallationDto,
+  AddInstallationEventDto,
+  InstallationEvent,
+  InstallationPhoto
+} from '../../shared/models/installation.model';
 
 /**
  * Mock API service that simulates a backend API using localStorage.
@@ -71,7 +79,8 @@ export class MockApiService {
     movements: 'umbrella_movements',
     alerts: 'umbrella_alerts',
     vendors: 'umbrella_vendors',
-    clients: 'umbrella_clients'
+    clients: 'umbrella_clients',
+    installations: 'umbrella_installations'
   };
 
   constructor() {
@@ -1905,5 +1914,139 @@ export class MockApiService {
     ];
 
     this.saveToStorage(this.STORAGE_KEYS.clients, clients);
+  }
+
+  // ========================================
+  // INSTALLATION METHODS
+  // ========================================
+
+  /**
+   * Get all installations
+   */
+  getInstallations(): Observable<Installation[]> {
+    const installations = this.getFromStorage<Installation>(this.STORAGE_KEYS.installations);
+    return of(installations).pipe(delay(this.DELAY_MS));
+  }
+
+  /**
+   * Get single installation by ID
+   */
+  getInstallation(id: string): Observable<Installation> {
+    const installations = this.getFromStorage<Installation>(this.STORAGE_KEYS.installations);
+    const installation = installations.find(i => i.id === id);
+
+    if (!installation) {
+      return throwError(() => new Error('Installation not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    return of(installation).pipe(delay(this.DELAY_MS));
+  }
+
+  /**
+   * Create new installation
+   */
+  createInstallation(dto: CreateInstallationDto): Observable<Installation> {
+    const installations = this.getFromStorage<Installation>(this.STORAGE_KEYS.installations);
+    const clients = this.getFromStorage<Client>(this.STORAGE_KEYS.clients);
+    const client = clients.find(c => c.id === dto.customerId);
+
+    const newInstallation: Installation = {
+      id: this.generateId(),
+      ...dto,
+      projectNumber: this.generateProjectNumber(),
+      customerName: client?.name || 'Unknown Customer',
+      status: 'scheduled',
+      events: [],
+      teamMembers: dto.teamMembers || [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    installations.push(newInstallation);
+    this.saveToStorage(this.STORAGE_KEYS.installations, installations);
+    return of(newInstallation).pipe(delay(this.DELAY_MS));
+  }
+
+  /**
+   * Update installation
+   */
+  updateInstallation(id: string, dto: Partial<UpdateInstallationDto>): Observable<Installation> {
+    const installations = this.getFromStorage<Installation>(this.STORAGE_KEYS.installations);
+    const index = installations.findIndex(i => i.id === id);
+
+    if (index === -1) {
+      return throwError(() => new Error('Installation not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    const updatedInstallation: Installation = {
+      ...installations[index],
+      ...dto,
+      id, // Ensure ID doesn't change
+      updatedAt: new Date()
+    };
+
+    installations[index] = updatedInstallation;
+    this.saveToStorage(this.STORAGE_KEYS.installations, installations);
+    return of(updatedInstallation).pipe(delay(this.DELAY_MS));
+  }
+
+  /**
+   * Add event to installation
+   */
+  addInstallationEvent(dto: AddInstallationEventDto): Observable<Installation> {
+    const installations = this.getFromStorage<Installation>(this.STORAGE_KEYS.installations);
+    const installation = installations.find(i => i.id === dto.installationId);
+
+    if (!installation) {
+      return throwError(() => new Error('Installation not found')).pipe(delay(this.DELAY_MS));
+    }
+
+    // Get user name (lookup from users)
+    const users = this.getFromStorage<User>(this.STORAGE_KEYS.users);
+    const user = users.find(u => u.id === dto.performedByUserId);
+
+    const newEvent: InstallationEvent = {
+      id: this.generateId(),
+      timestamp: new Date(),
+      eventType: dto.eventType,
+      title: dto.title,
+      description: dto.description,
+      performedBy: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+      performedByUserId: dto.performedByUserId,
+      photos: (dto.photos || []).map((photoData, index) => ({
+        id: this.generateId(),
+        filename: `event-photo-${index + 1}.jpg`,
+        url: photoData,
+        uploadedAt: new Date(),
+        uploadedBy: user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
+      })),
+      measurements: dto.measurements,
+      status: dto.status,
+      issueDescription: dto.issueDescription
+    };
+
+    installation.events.push(newEvent);
+    installation.updatedAt = new Date();
+
+    // Auto-update installation status based on event
+    if (dto.eventType === 'completion' && dto.status === 'completed') {
+      installation.status = 'completed';
+      installation.completedAt = new Date();
+    } else if (installation.status === 'scheduled' && installation.events.length === 1) {
+      installation.status = 'in_progress';
+      installation.startedAt = new Date();
+    }
+
+    this.saveToStorage(this.STORAGE_KEYS.installations, installations);
+    return of(installation).pipe(delay(this.DELAY_MS));
+  }
+
+  /**
+   * Generate project number (INS-YYYY-NNNN)
+   */
+  private generateProjectNumber(): string {
+    const year = new Date().getFullYear();
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    return `INS-${year}-${random}`;
   }
 }
