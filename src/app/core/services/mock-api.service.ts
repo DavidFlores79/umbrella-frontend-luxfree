@@ -1197,20 +1197,20 @@ export class MockApiService {
     const companies: Company[] = [
       {
         id: 'company-1',
-        name: 'Tech Solutions Inc.',
-        email: 'contact@techsolutions.com',
-        phone: '+1 (555) 123-4567',
-        address: '123 Innovation Drive',
-        city: 'San Francisco',
-        state: 'CA',
-        country: 'USA',
-        postalCode: '94105',
-        taxId: 'US123456789',
-        website: 'https://techsolutions.com',
-        settings: this.getDefaultCompanySettings({ currency: 'USD', plan: 'premium' } as any),
+        name: 'Luxfree Solar Solutions',
+        email: 'contacto@luxfree.com',
+        phone: '+52 (999) 123-4567',
+        address: 'Calle 60 #450 x 51 y 53, Col. Centro',
+        city: 'Mérida',
+        state: 'Yucatán',
+        country: 'México',
+        postalCode: '97000',
+        taxId: 'LUX850623ND4',
+        website: 'https://luxfree.com',
+        settings: this.getDefaultCompanySettings({ currency: 'MXN', plan: 'premium' } as any),
         status: 'active',
         isActive: true,
-        createdAt: new Date('2023-01-15'),
+        createdAt: new Date('2020-03-15'),
         updatedAt: new Date('2025-01-01')
       },
       {
@@ -1255,46 +1255,46 @@ export class MockApiService {
 
   private seedUsers(): void {
     const users: User[] = [
-      // Tech Solutions Inc. users
+      // Luxfree Solar Solutions users
       {
         id: 'user-1',
         companyId: 'company-1',
-        email: 'admin@techsolutions.com',
-        firstName: 'John',
-        lastName: 'Admin',
-        phone: '+1 (555) 100-0001',
+        email: 'admin@luxfree.com',
+        firstName: 'David',
+        lastName: 'Flores',
+        phone: '+52 (999) 100-0001',
         role: 'admin',
         permissions: ROLE_PERMISSIONS.admin,
         isActive: true,
         lastLogin: new Date('2025-01-25'),
-        createdAt: new Date('2023-01-15'),
+        createdAt: new Date('2020-03-15'),
         updatedAt: new Date('2025-01-25')
       },
       {
         id: 'user-2',
         companyId: 'company-1',
-        email: 'manager@techsolutions.com',
-        firstName: 'Sarah',
-        lastName: 'Manager',
-        phone: '+1 (555) 100-0002',
+        email: 'gerente@luxfree.com',
+        firstName: 'María',
+        lastName: 'González',
+        phone: '+52 (999) 100-0002',
         role: 'manager',
         permissions: ROLE_PERMISSIONS.manager,
         isActive: true,
         lastLogin: new Date('2025-01-24'),
-        createdAt: new Date('2023-02-01'),
+        createdAt: new Date('2020-04-01'),
         updatedAt: new Date('2025-01-24')
       },
       {
         id: 'user-3',
         companyId: 'company-1',
-        email: 'user@techsolutions.com',
-        firstName: 'Mike',
-        lastName: 'User',
-        phone: '+1 (555) 100-0003',
+        email: 'tecnico@luxfree.com',
+        firstName: 'Jorge',
+        lastName: 'Medina',
+        phone: '+52 (999) 100-0003',
         role: 'user',
         permissions: ROLE_PERMISSIONS.user,
         isActive: true,
-        createdAt: new Date('2023-03-15'),
+        createdAt: new Date('2020-05-15'),
         updatedAt: new Date('2025-01-01')
       },
       // Global Traders Ltd. users
@@ -1402,46 +1402,89 @@ export class MockApiService {
     // For now, adding a representative sample
     const products: Product[] = [];
 
-    // Tech Solutions Inc. products (20 products)
-    const techProducts = [
-      { sku: 'LAPTOP-001', name: 'Dell XPS 15 Laptop', category: 'electronics', price: 1299.99, cost: 950.00 },
-      { sku: 'LAPTOP-002', name: 'MacBook Pro 14"', category: 'electronics', price: 1999.99, cost: 1500.00 },
-      { sku: 'MOUSE-001', name: 'Logitech MX Master 3', category: 'electronics', price: 99.99, cost: 65.00 },
-      { sku: 'KB-001', name: 'Mechanical Keyboard RGB', category: 'electronics', price: 149.99, cost: 95.00 },
-      { sku: 'MON-001', name: '27" 4K Monitor', category: 'electronics', price: 399.99, cost: 280.00 },
-      { sku: 'HD-001', name: '1TB External SSD', category: 'electronics', price: 129.99, cost: 85.00 },
-      { sku: 'WEB-001', name: 'HD Webcam 1080p', category: 'electronics', price: 79.99, cost: 45.00 },
-      { sku: 'HEAD-001', name: 'Wireless Headphones', category: 'electronics', price: 249.99, cost: 150.00 },
-      { sku: 'TAB-001', name: 'iPad Pro 11"', category: 'electronics', price: 799.99, cost: 600.00 },
-      { sku: 'DOCK-001', name: 'USB-C Docking Station', category: 'electronics', price: 199.99, cost: 130.00 },
-      { sku: 'SOFT-001', name: 'Software License (Annual)', category: 'software', price: 499.99, cost: 100.00 },
-      { sku: 'SOFT-002', name: 'Cloud Storage (1TB/year)', category: 'software', price: 119.99, cost: 50.00 },
-      { sku: 'SERV-001', name: 'IT Consulting (per hour)', category: 'services', price: 150.00, cost: 0.00 },
-      { sku: 'SERV-002', name: 'Network Setup', category: 'services', price: 500.00, cost: 0.00 },
-      { sku: 'SERV-003', name: 'System Maintenance', category: 'services', price: 200.00, cost: 0.00 },
-      { sku: 'CABLE-001', name: 'HDMI Cable 6ft', category: 'supplies', price: 19.99, cost: 8.00 },
-      { sku: 'CABLE-002', name: 'USB-C Cable 10ft', category: 'supplies', price: 24.99, cost: 12.00 },
-      { sku: 'ADAP-001', name: 'USB-C to HDMI Adapter', category: 'supplies', price: 29.99, cost: 15.00 },
-      { sku: 'CASE-001', name: 'Laptop Carrying Case', category: 'supplies', price: 49.99, cost: 25.00 },
-      { sku: 'STAND-001', name: 'Laptop Stand Aluminum', category: 'supplies', price: 59.99, cost: 30.00 }
+    // Luxfree Solar Solutions products (30+ products - Solar & Lighting)
+    const luxfreeProducts = [
+      // Solar Panel Systems
+      { sku: 'SOLAR-PANEL-300', name: 'Panel Solar Monocristalino 300W', category: 'solar', price: 2850.00, cost: 1950.00 },
+      { sku: 'SOLAR-PANEL-400', name: 'Panel Solar Monocristalino 400W', category: 'solar', price: 3650.00, cost: 2550.00 },
+      { sku: 'SOLAR-PANEL-450', name: 'Panel Solar Bifacial 450W', category: 'solar', price: 4250.00, cost: 2950.00 },
+      { sku: 'SOLAR-PANEL-550', name: 'Panel Solar Alta Eficiencia 550W', category: 'solar', price: 5450.00, cost: 3850.00 },
+      
+      // Inverters
+      { sku: 'INV-MICRO-1000', name: 'Microinversor 1000W', category: 'solar', price: 3250.00, cost: 2150.00 },
+      { sku: 'INV-STRING-5K', name: 'Inversor String 5kW Monofásico', category: 'solar', price: 18500.00, cost: 13500.00 },
+      { sku: 'INV-STRING-10K', name: 'Inversor String 10kW Trifásico', category: 'solar', price: 32500.00, cost: 24000.00 },
+      { sku: 'INV-HYBRID-5K', name: 'Inversor Híbrido 5kW con Batería', category: 'solar', price: 45500.00, cost: 34000.00 },
+      { sku: 'INV-HYBRID-10K', name: 'Inversor Híbrido 10kW con Batería', category: 'solar', price: 68500.00, cost: 52000.00 },
+      
+      // Mounting & Structure
+      { sku: 'MOUNT-ROOF-TILE', name: 'Estructura Montaje Teja (10 paneles)', category: 'solar', price: 4850.00, cost: 3250.00 },
+      { sku: 'MOUNT-ROOF-METAL', name: 'Estructura Montaje Lámina (10 paneles)', category: 'solar', price: 3950.00, cost: 2650.00 },
+      { sku: 'MOUNT-GROUND', name: 'Estructura Montaje Piso (10 paneles)', category: 'solar', price: 6850.00, cost: 4650.00 },
+      { sku: 'MOUNT-TRACKER', name: 'Seguidor Solar 1 Eje (20 paneles)', category: 'solar', price: 45500.00, cost: 32000.00 },
+      
+      // Batteries & Storage
+      { sku: 'BATT-LIFEPO4-5KWH', name: 'Batería LiFePO4 5kWh 48V', category: 'solar', price: 32500.00, cost: 24500.00 },
+      { sku: 'BATT-LIFEPO4-10KWH', name: 'Batería LiFePO4 10kWh 48V', category: 'solar', price: 58500.00, cost: 44500.00 },
+      { sku: 'BATT-LIFEPO4-15KWH', name: 'Batería LiFePO4 15kWh 48V', category: 'solar', price: 82500.00, cost: 64000.00 },
+      
+      // Cables & Connectors
+      { sku: 'CABLE-SOLAR-6MM-100M', name: 'Cable Solar 6mm² (100m)', category: 'supplies', price: 3250.00, cost: 2150.00 },
+      { sku: 'CABLE-SOLAR-4MM-100M', name: 'Cable Solar 4mm² (100m)', category: 'supplies', price: 2450.00, cost: 1650.00 },
+      { sku: 'MC4-CONNECTOR-PAIR', name: 'Conectores MC4 (10 pares)', category: 'supplies', price: 285.00, cost: 185.00 },
+      { sku: 'JUNCTION-BOX', name: 'Caja de Conexiones String Box 2 in 1 out', category: 'supplies', price: 1850.00, cost: 1250.00 },
+      
+      // Residential Street Lighting
+      { sku: 'LIGHT-LED-30W-SOLAR', name: 'Luminaria LED Solar 30W con Poste 4m', category: 'lighting', price: 8850.00, cost: 6250.00 },
+      { sku: 'LIGHT-LED-50W-SOLAR', name: 'Luminaria LED Solar 50W con Poste 5m', category: 'lighting', price: 12500.00, cost: 8850.00 },
+      { sku: 'LIGHT-LED-60W-SOLAR', name: 'Luminaria LED Solar 60W con Poste 6m', category: 'lighting', price: 15850.00, cost: 11250.00 },
+      { sku: 'LIGHT-LED-100W-SOLAR', name: 'Luminaria LED Solar 100W con Poste 7m', category: 'lighting', price: 22500.00, cost: 16850.00 },
+      
+      // Public Street Lighting
+      { sku: 'LIGHT-LED-150W-SOLAR-PUB', name: 'Luminaria Pública LED Solar 150W Poste 8m', category: 'lighting', price: 32500.00, cost: 24500.00 },
+      { sku: 'LIGHT-LED-200W-SOLAR-PUB', name: 'Luminaria Pública LED Solar 200W Poste 10m', category: 'lighting', price: 42500.00, cost: 32000.00 },
+      { sku: 'LIGHT-LED-250W-SOLAR-PUB', name: 'Luminaria Pública LED Solar 250W Poste 12m', category: 'lighting', price: 54500.00, cost: 41500.00 },
+      { sku: 'POLE-GALV-6M', name: 'Poste Galvanizado 6m para Luminaria', category: 'lighting', price: 3850.00, cost: 2650.00 },
+      { sku: 'POLE-GALV-8M', name: 'Poste Galvanizado 8m para Luminaria', category: 'lighting', price: 5250.00, cost: 3850.00 },
+      { sku: 'POLE-GALV-10M', name: 'Poste Galvanizado 10m para Luminaria', category: 'lighting', price: 7850.00, cost: 5650.00 },
+      { sku: 'POLE-GALV-12M', name: 'Poste Galvanizado 12m para Luminaria', category: 'lighting', price: 10850.00, cost: 7850.00 },
+      
+      // Installation Services
+      { sku: 'SERV-INSTALL-RES-3KW', name: 'Instalación Sistema Solar Residencial hasta 3kW', category: 'services', price: 8500.00, cost: 0.00 },
+      { sku: 'SERV-INSTALL-RES-5KW', name: 'Instalación Sistema Solar Residencial hasta 5kW', category: 'services', price: 12500.00, cost: 0.00 },
+      { sku: 'SERV-INSTALL-RES-10KW', name: 'Instalación Sistema Solar Residencial hasta 10kW', category: 'services', price: 18500.00, cost: 0.00 },
+      { sku: 'SERV-INSTALL-COM-20KW', name: 'Instalación Sistema Solar Comercial hasta 20kW', category: 'services', price: 32500.00, cost: 0.00 },
+      { sku: 'SERV-INSTALL-LIGHT-RES', name: 'Instalación Luminaria Residencial (por unidad)', category: 'services', price: 2500.00, cost: 0.00 },
+      { sku: 'SERV-INSTALL-LIGHT-PUB', name: 'Instalación Luminaria Pública (por unidad)', category: 'services', price: 4500.00, cost: 0.00 },
+      
+      // Maintenance Services
+      { sku: 'SERV-MAINT-SOLAR-BASIC', name: 'Mantenimiento Preventivo Sistema Solar (Básico)', category: 'services', price: 1850.00, cost: 0.00 },
+      { sku: 'SERV-MAINT-SOLAR-COMP', name: 'Mantenimiento Preventivo Sistema Solar (Completo)', category: 'services', price: 3850.00, cost: 0.00 },
+      { sku: 'SERV-MAINT-LIGHT', name: 'Mantenimiento Luminarias (por unidad)', category: 'services', price: 850.00, cost: 0.00 },
+      
+      // Engineering & Consulting
+      { sku: 'SERV-DESIGN-RES', name: 'Proyecto y Diseño Sistema Solar Residencial', category: 'services', price: 5500.00, cost: 0.00 },
+      { sku: 'SERV-DESIGN-COM', name: 'Proyecto y Diseño Sistema Solar Comercial/Industrial', category: 'services', price: 15500.00, cost: 0.00 },
+      { sku: 'SERV-CONSULT-HOUR', name: 'Consultoría Energética (por hora)', category: 'services', price: 850.00, cost: 0.00 },
+      { sku: 'SERV-PERMITS', name: 'Gestión de Permisos CFE/Municipales', category: 'services', price: 4500.00, cost: 0.00 }
     ];
 
-    techProducts.forEach(p => {
+    luxfreeProducts.forEach(p => {
       products.push({
-        id: `product-tech-${products.length + 1}`,
+        id: `product-luxfree-${products.length + 1}`,
         companyId: 'company-1',
         sku: p.sku,
         name: p.name,
-        description: `High-quality ${p.name.toLowerCase()} for professional use`,
+        description: `${p.name} - Alta calidad y garantía extendida`,
         category: p.category as any,
-        type: p.category === 'services' ? 'service' : (p.category === 'software' ? 'service' : 'product'),
+        type: p.category === 'services' ? 'service' : 'product',
         price: p.price,
         cost: p.cost,
-        taxRate: 8.5,
-        unit: p.category === 'services' ? 'hour' : 'piece',
+        taxRate: 16.0,
+        unit: p.category === 'services' ? 'servicio' : 'pieza',
         isActive: true,
-        trackInventory: p.category !== 'services' && p.category !== 'software',
-        createdAt: new Date('2023-01-20'),
+        trackInventory: p.category !== 'services',
+        createdAt: new Date('2020-03-20'),
         updatedAt: new Date('2025-01-01')
       });
     });
@@ -1751,43 +1794,97 @@ export class MockApiService {
 
   private seedVendors(): void {
     const vendors: Vendor[] = [
+      // Luxfree Solar Solutions vendors
       {
         id: 'vendor-1',
         companyId: 'company-1',
-        name: 'Tech Distributor Inc.',
-        email: 'sales@techdist.com',
-        phone: '+1 (555) 300-0001',
-        address: '123 Tech Street, Silicon Valley, CA 94025',
-        taxId: 'TAX-001-TECH',
-        notes: 'Primary supplier for computer hardware and peripherals',
+        name: 'JA Solar México S. de R.L.',
+        email: 'ventas@jasolar.com.mx',
+        phone: '+52 (55) 5300-0001',
+        address: 'Av. Insurgentes Sur 1458, Col. Actipan, CDMX, C.P. 03230',
+        taxId: 'JAS140825XX1',
+        notes: 'Proveedor principal de paneles solares monocristalinos',
         isActive: true,
-        createdAt: new Date('2024-01-15'),
+        createdAt: new Date('2020-04-15'),
         updatedAt: new Date('2024-01-15')
       },
       {
         id: 'vendor-2',
         companyId: 'company-1',
-        name: 'Office Supplies Plus',
-        email: 'orders@officesupplies.com',
-        phone: '+1 (555) 300-0002',
-        address: '456 Office Way, Business City, NY 10001',
-        taxId: 'TAX-002-OFFICE',
-        notes: 'Office furniture and supplies',
+        name: 'Growatt Inversores México',
+        email: 'info@growatt.mx',
+        phone: '+52 (55) 5300-0002',
+        address: 'Calz. de Tlalpan 1234, Col. Portales, CDMX, C.P. 03300',
+        taxId: 'GRO160315XX5',
+        notes: 'Inversores string y híbridos - Mejor precio/calidad',
         isActive: true,
-        createdAt: new Date('2024-02-01'),
+        createdAt: new Date('2020-05-01'),
         updatedAt: new Date('2024-02-01')
       },
       {
         id: 'vendor-3',
         companyId: 'company-1',
-        name: 'Global Electronics',
-        email: 'contact@globalelec.com',
-        phone: '+1 (555) 300-0003',
-        address: '789 Electronics Blvd, Tech City, TX 75001',
-        taxId: 'TAX-003-ELEC',
+        name: 'BYD Energy Storage México',
+        email: 'comercial@bydenergy.mx',
+        phone: '+52 (55) 5300-0003',
+        address: 'Av. Santa Fe 495, Col. Cruz Manca, CDMX, C.P. 05349',
+        taxId: 'BYD180920XX8',
+        notes: 'Baterías LiFePO4 y sistemas de almacenamiento',
         isActive: true,
-        createdAt: new Date('2024-03-01'),
+        createdAt: new Date('2020-06-15'),
         updatedAt: new Date('2024-03-01')
+      },
+      {
+        id: 'vendor-4',
+        companyId: 'company-1',
+        name: 'Estructuras Solares del Sureste',
+        email: 'ventas@estructurassolar.com',
+        phone: '+52 (999) 300-0001',
+        address: 'Calle 62 #385 x 43 y 45, Centro, Mérida, Yucatán, C.P. 97000',
+        taxId: 'ESS190410XX2',
+        notes: 'Fabricante local de estructuras de montaje - Entregas rápidas',
+        isActive: true,
+        createdAt: new Date('2020-07-01'),
+        updatedAt: new Date('2024-01-20')
+      },
+      {
+        id: 'vendor-5',
+        companyId: 'company-1',
+        name: 'Iluminación LED Yucatán',
+        email: 'proyectos@ledyucatan.com',
+        phone: '+52 (999) 300-0002',
+        address: 'Av. Itzáes #234, Col. García Ginerés, Mérida, Yucatán, C.P. 97070',
+        taxId: 'ILY170815XX6',
+        notes: 'Luminarias LED solares para alumbrado público',
+        isActive: true,
+        createdAt: new Date('2020-08-10'),
+        updatedAt: new Date('2024-02-10')
+      },
+      {
+        id: 'vendor-6',
+        companyId: 'company-1',
+        name: 'Postes y Herrajes del Golfo',
+        email: 'ventas@postesgolfo.com',
+        phone: '+52 (999) 300-0003',
+        address: 'Carretera Mérida-Progreso Km 15.5, Mérida, Yucatán, C.P. 97310',
+        taxId: 'PHG150620XX9',
+        notes: 'Postes galvanizados para alumbrado - Fabricación local',
+        isActive: true,
+        createdAt: new Date('2021-01-15'),
+        updatedAt: new Date('2024-01-25')
+      },
+      {
+        id: 'vendor-7',
+        companyId: 'company-1',
+        name: 'Cables y Conductores Eléctricos SA',
+        email: 'ventas@cablesconductores.com.mx',
+        phone: '+52 (55) 5300-0004',
+        address: 'Circuito Exterior Mexiquense #450, Naucalpan, Estado de México, C.P. 53370',
+        taxId: 'CCE130505XX3',
+        notes: 'Cable solar certificado UV - Stock permanente',
+        isActive: true,
+        createdAt: new Date('2021-02-01'),
+        updatedAt: new Date('2024-03-10')
       },
       {
         id: 'vendor-4',
@@ -1834,15 +1931,16 @@ export class MockApiService {
 
   private seedClients(): void {
     const clients: Client[] = [
+      // Luxfree Solar Solutions clients
       {
         id: 'client-1',
         companyId: 'company-1',
-        name: 'ABC Corporation',
-        email: 'purchasing@abccorp.com',
-        phone: '+1 (555) 100-0001',
-        address: '100 Corporate Plaza, Business District, CA 90001',
-        taxId: 'TAX-CLIENT-001',
-        notes: 'Regular corporate client - Net 30 payment terms',
+        name: 'Residencial Las Américas',
+        email: 'administracion@lasamericas.mx',
+        phone: '+52 (999) 200-0001',
+        address: 'Privada Las Américas #123, Col. Montecristo, Mérida, Yucatán, C.P. 97133',
+        taxId: 'RLA850623ND4',
+        notes: 'Fraccionamiento residencial - Proyecto alumbrado público solar',
         isActive: true,
         createdAt: new Date('2024-01-10'),
         updatedAt: new Date('2024-01-10')
@@ -1850,12 +1948,12 @@ export class MockApiService {
       {
         id: 'client-2',
         companyId: 'company-1',
-        name: 'XYZ Enterprises',
-        email: 'accounts@xyzent.com',
-        phone: '+1 (555) 100-0002',
-        address: '200 Enterprise Way, Commerce City, CA 90002',
-        taxId: 'TAX-CLIENT-002',
-        notes: 'VIP client - priority shipping',
+        name: 'Gobierno Municipal de Umán',
+        email: 'obras.publicas@uman.gob.mx',
+        phone: '+52 (999) 200-0002',
+        address: 'Palacio Municipal, Calle 20 s/n, Centro, Umán, Yucatán, C.P. 97390',
+        taxId: 'UMA850101XX0',
+        notes: 'Cliente gobierno - Alumbrado público vialidades principales',
         isActive: true,
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15')
@@ -1863,14 +1961,80 @@ export class MockApiService {
       {
         id: 'client-3',
         companyId: 'company-1',
-        name: 'Tech Startup LLC',
-        email: 'billing@techstartup.com',
-        phone: '+1 (555) 100-0003',
-        address: '300 Innovation Drive, Startup Valley, CA 94025',
-        taxId: 'TAX-CLIENT-003',
+        name: 'Hotel Hacienda Xcanatún',
+        email: 'mantenimiento@xcanatun.com',
+        phone: '+52 (999) 200-0003',
+        address: 'Calle 20 s/n x 19 y 19A, Xcanatún, Mérida, Yucatán, C.P. 97302',
+        taxId: 'HHX100215XX3',
+        notes: 'Sistema solar para reducción de costos energéticos',
         isActive: true,
         createdAt: new Date('2024-02-01'),
         updatedAt: new Date('2024-02-01')
+      },
+      {
+        id: 'client-4',
+        companyId: 'company-1',
+        name: 'Industrias del Sureste S.A. de C.V.',
+        email: 'compras@indusureste.com',
+        phone: '+52 (999) 200-0004',
+        address: 'Parque Industrial Yucatán, Lote 15, Kanasín, Yucatán, C.P. 97370',
+        taxId: 'ISU950815XX9',
+        notes: 'Instalación industrial 50kW - Reducción huella carbono',
+        isActive: true,
+        createdAt: new Date('2024-02-10'),
+        updatedAt: new Date('2024-02-10')
+      },
+      {
+        id: 'client-5',
+        companyId: 'company-1',
+        name: 'Familia Pérez García',
+        email: 'carlos.perez@email.com',
+        phone: '+52 (999) 200-0005',
+        address: 'Calle 45 #234 x 22 y 24, Col. Sodzil Norte, Mérida, Yucatán, C.P. 97115',
+        taxId: 'PEGC801215XX6',
+        notes: 'Cliente residencial - Sistema 5kW con baterías',
+        isActive: true,
+        createdAt: new Date('2024-03-01'),
+        updatedAt: new Date('2024-03-01')
+      },
+      {
+        id: 'client-6',
+        companyId: 'company-1',
+        name: 'Plaza Comercial La Isla',
+        email: 'gerencia@plazalaisla.com',
+        phone: '+52 (999) 200-0006',
+        address: 'Av. Colón #501, Col. García Ginerés, Mérida, Yucatán, C.P. 97070',
+        taxId: 'PCL120630XX2',
+        notes: 'Sistema solar estacionamiento + iluminación LED',
+        isActive: true,
+        createdAt: new Date('2024-03-15'),
+        updatedAt: new Date('2024-03-15')
+      },
+      {
+        id: 'client-7',
+        companyId: 'company-1',
+        name: 'Universidad Tecnológica Metropolitana',
+        email: 'infraestructura@utm.edu.mx',
+        phone: '+52 (999) 200-0007',
+        address: 'Calle 115 #404, Col. Chuburná de Hidalgo, Mérida, Yucatán, C.P. 97200',
+        taxId: 'UTM080915XX5',
+        notes: 'Proyecto educativo - Sistema 30kW con propósito didáctico',
+        isActive: true,
+        createdAt: new Date('2024-04-01'),
+        updatedAt: new Date('2024-04-01')
+      },
+      {
+        id: 'client-8',
+        companyId: 'company-1',
+        name: 'Súper Farmacia del Mayab',
+        email: 'operaciones@farmayab.com',
+        phone: '+52 (999) 200-0008',
+        address: 'Av. Itzáes #502, Col. Centro, Mérida, Yucatán, C.P. 97000',
+        taxId: 'SFM140720XX8',
+        notes: 'Cadena de farmacias - 8 sucursales',
+        isActive: true,
+        createdAt: new Date('2024-04-20'),
+        updatedAt: new Date('2024-04-20')
       },
       {
         id: 'client-4',

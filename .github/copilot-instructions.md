@@ -354,6 +354,23 @@ ng generate interceptor core/interceptors/interceptor-name --functional
 - Interceptors: `*.interceptor.ts`
 - Routes: `*.routes.ts`
 
+## Git Commit Guidelines
+
+**CRITICAL - Commit Message Rules:**
+- ❌ **FORBIDDEN**: Never include references to AI assistants (Claude, ChatGPT, Copilot, etc.), AI companies (Anthropic, OpenAI, etc.), or AI-generated markers (🤖, "Generated with...", "AI-assisted", etc.) in commit messages
+- ✅ Write clear, descriptive commit messages following conventional commits format
+- ✅ Use prefixes: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+- ✅ Keep messages professional and project-focused
+- ✅ Commits should appear as if written by a human developer
+
+**Examples:**
+- ✅ `feat: add Luxfree solar products and clients to mock data`
+- ✅ `fix: resolve TypeScript errors in client model`
+- ✅ `refactor: consolidate address fields in client and vendor models`
+- ❌ `🤖 Generated with Claude Code: update mock data`
+- ❌ `AI-assisted: fix TypeScript errors`
+- ❌ `feat: add products (via ChatGPT)`
+
 ## Critical Checklist for New Features
 
 - [ ] Component is standalone with `standalone: true`
